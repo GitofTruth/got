@@ -1,7 +1,7 @@
-package GoT
+package main
 
-	
 import "fmt"
+
 func main() {
-    fmt.Println("hello world to GoT")
+	fmt.Println("hello world to GoT -Hassan")
 }
