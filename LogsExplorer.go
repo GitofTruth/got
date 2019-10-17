@@ -54,12 +54,10 @@ func (le *LogsExplorer) LoadLogs() bool {
 	return true
 }
 
-
 func (le *LogsExplorer) PrintAllLogs() bool {
 	if le.Logs != nil {
 		fmt.Println(le.Logs)
 	}
-
 
 	// le.Logs.ForEach(func(arg1 *object.Commit) error {
 	// 	fmt.Println(arg1)
@@ -69,7 +67,7 @@ func (le *LogsExplorer) PrintAllLogs() bool {
 	for {
 		fmt.Println("starting iterating")
 		cmm, err := le.Logs.Next()
-		if err!=nil{
+		if err != nil {
 			break
 		}
 		fmt.Println(cmm)
