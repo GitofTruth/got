@@ -5,12 +5,12 @@ type CommitLog struct {
 	Author       string   `json:"author"`
 	Committer    string   `json:"committer"`
 	Timestamp    int      `json:"timestamp"`
-	Hash         []byte   `json:"hash"`
-	Parenthashes [][]byte `json:"parenthash"`
+	Hash         string   `json:"hash"`
+	Parenthashes []string `json:"parenthash"`
 	Signature    []byte   `json:"signature"`
 }
 
-func CreateCommitLog(message string, author string, commiter string, timestamp int, hash []byte, parenthashes [][]byte, signature []byte) (CommitLog, error) {
+func CreateCommitLog(message string, author string, commiter string, timestamp int, hash string, parenthashes []string, signature []byte) (CommitLog, error) {
 	var log CommitLog
 	log.Message = message
 	log.Author = author
