@@ -19,3 +19,14 @@ func CreateRepoBranch(author string, timestamp int, logs map[string]CommitLog) (
 
 	return repoBranch, nil
 }
+
+func (branch *RepoBranch) AddLog(commitLog CommitLog) (bool, error) {
+
+	for ind, hash := range commitLog.Parenthashes {
+		if _, exist := branch.Logs[hash]; exist {
+			branch.Logs[commitLog.Hash = commitLog
+			break
+		}
+	}
+
+}
