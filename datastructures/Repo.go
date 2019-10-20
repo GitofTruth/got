@@ -14,10 +14,9 @@ func CreateNewRepo(author string, timestamp int, branches map[string]RepoBranch)
 	repo.Timestamp = timestamp
 	repo.CommitHashes = make(map[string]struct{})
 
-	for branchName, branch := range branches{
-		for commitHash, log := range branch.Logs{
-			var empty struct{}
-			repo.CommitHashes[commitHash] = empty
+	for _, branch := range branches {
+		for _, log := range branch.Logs {
+			repo.AddCommitHash(log)
 		}
 	}
 
@@ -35,7 +34,6 @@ func (repo *Repo) IsCommitHash(hashName string) bool {
 	return exist
 }
 
-
 func (repo *Repo) IsBranch(branchName string) bool {
 	_, exist := repo.Branches[branchName]
 	return exist
@@ -46,23 +44,24 @@ func (repo *Repo) ValidCommitLog(commitLog CommitLog, branchName string) (bool, 
 
 	if repo.IsBranch(branchName) {
 		branch := repo.Branches[branchName]
+		if valid, _ := branch.ValidLog(commitLog); valid {
 
-		allParentsAreHashes := true
-		for index, parentHash := range commitLog.Parenthashes{
+			allParentsAreHashes := true
+			for _, parentHash := range commitLog.Parenthashes {
 				allParentsAreHashes = allParentsAreHashes && repo.IsCommitHash(parentHash)
-				if (!allParentsAreHashes){
+				if !allParentsAreHashes {
 					break
 				}
-		}
+			}
 
-		if(allParentsAreHashes){
+			if allParentsAreHashes {
 				return true, nil
+			}
 		}
 	}
 
 	return false, nil
 }
-
 
 //Check that all parents hashes are current hashes or previous ones in the new hashes list
 func (repo *Repo) ValidCommitLogs(commitLogs []CommitLog, branchName string) (bool, error) {
@@ -72,55 +71,60 @@ func (repo *Repo) ValidCommitLogs(commitLogs []CommitLog, branchName string) (bo
 	if repo.IsBranch(branchName) {
 		branch := repo.Branches[branchName]
 
-		for _, commitLog := range commitLogs{
-			if valid,_ := branch.ValidLog(commitLog); valid{
+		for _, commitLog := range commitLogs {
+			if valid, _ := branch.ValidLog(commitLog); valid {
 
 				allParentsAreHashes := true
-				for _, parentHash := range commitLog.Parenthashes{
+				for _, parentHash := range commitLog.Parenthashes {
+					_, exist := previousHashes[parentHash]
+					allParentsAreHashes = allParentsAreHashes && (repo.IsCommitHash(parentHash) || exist)
+					if !allParentsAreHashes {
+						break
+					}
+				}
+				if !allParentsAreHashes {
+					return false, nil
+				}
 
-						allParentsAreHashes = allParentsAreHashes && repo.IsCommitHash(parentHash)
-						if (!allParentsAreHashes){
-							break
-							}
-
+				var empty struct{}
+				previousHashes[commitLog.Hash] = empty
+			} else {
+				return false, nil
 			}
-
 		}
-
-
-		}
-
-		if(allParentsAreHashes){
-				return true, nil
-		}
-
 	}
 
-	return false, nil
-}
-
-func (repo *Repo) ValidBranch(repoBranch RepoBranch) (bool, error) {
 	return true, nil
 }
 
-func (repo *Repo) AddCommitLogInBranch(commitLog CommitLog, branchName string) (bool, error) {
+//need to check commits in the branch
+func (repo *Repo) ValidBranch(Branch RepoBranch) (bool, error) {
+	return !repo.IsBranch(Branch.Name), nil
+}
 
-	if repo.IsBranch(branchName) {
+func (repo *Repo) AddCommitHash(commitLog CommitLog) bool {
+	var empty struct{}
+	repo.CommitHashes[commitLog.Hash] = empty
+	return true
+}
+
+func (repo *Repo) AddCommitHashes(commitLogs []CommitLog) bool {
+	var empty struct{}
+	for _, commitLog := range commitLogs {
+		repo.CommitHashes[commitLog.Hash] = empty
+	}
+	return true
+}
+
+func (repo *Repo) AddCommitLog(commitLog CommitLog, branchName string) (bool, error) {
+
+	if valid, _ := repo.ValidCommitLog(commitLog, branchName); valid {
+
 		branch := repo.Branches[branchName]
-
-		allParentsAreHashes := true
-		for index, parentHash := range commitLog.Parenthashes{
-				allParentsAreHashes = allParentsAreHashes && repo.IsCommitHash(parentHash)
-				if (!allParentsAreHashes){
-					break
-				}
-		}
-
-		if(allParentsAreHashes){
-			if done, _ := branch.AddLog(commitLog); done {
-				repo.Branches[branchName] = branch
-				return true, nil
-			}
+		if done, _ := branch.AddCommitLog(commitLog); done {
+			repo.Branches[branchName] = branch
+			repo.AddCommitHash(commitLog)
+			return true, nil
 		}
 
 	}
@@ -128,14 +132,38 @@ func (repo *Repo) AddCommitLogInBranch(commitLog CommitLog, branchName string) (
 	return false, nil
 }
 
+//What if not all the commits were added? rolling back?
+func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string) (bool, error) {
+
+	if valid, _ := repo.ValidCommitLogs(commitLogs, branchName); valid {
+
+		branch := repo.Branches[branchName]
+		fullDone := true
+		for _, commitLog := range commitLogs {
+			if done, _ := branch.AddCommitLog(commitLog); !done {
+				fullDone = false
+				break
+			}
+		}
+
+		if fullDone {
+			repo.Branches[branchName] = branch
+			repo.AddCommitHashes(commitLogs)
+		}
+	}
+
+	return false, nil
+}
 
 func (repo *Repo) AddBranch(branch RepoBranch) (bool, error) {
 
-	if !repo.IsBranch(branch.Name) {
+	if valid, _ := repo.ValidBranch(branch); valid {
+
 		repo.Branches[branch.Name] = branch
-			for commitHash, log := range branch.Logs{
-				repo.CommitHashes[commitHash] = struct{}
-			}
+		for _, log := range branch.Logs {
+			repo.AddCommitHash(log)
+		}
+
 		return true, nil
 	}
 
