@@ -10,7 +10,7 @@ type CommitLog struct {
 	Signature    []byte   `json:"signature"`
 }
 
-func CreateCommitLog(message string, author string, commiter string, timestamp int, hash string, parenthashes []string, signature []byte) (CommitLog, error) {
+func CreateNewCommitLog(message string, author string, commiter string, timestamp int, hash string, parenthashes []string, signature []byte) (CommitLog, error) {
 	var log CommitLog
 	log.Message = message
 	log.Author = author
