@@ -14,11 +14,6 @@ type RepoContract struct {
 	PushNumber int
 }
 
-type PushLog struct {
-	BranchName string
-	Logs       []datastructures.CommitLog
-}
-
 //how to pass variables for initialization?
 func (contract *RepoContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
 	contract.Repo, _ = datastructures.CreateNewRepo("", 0, nil)
@@ -59,7 +54,7 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 	APIstub.PutState(string(contract.PushNumber), []byte(args[0]))
 	contract.PushNumber = contract.PushNumber + 1
 
-	var pushLog PushLog
+	var pushLog datastructures.PushLog
 	json.Unmarshal([]byte(args[0]), &pushLog)
 
 	done, _ := contract.AddCommitLogs(pushLog.Logs, pushLog.BranchName)
@@ -86,15 +81,15 @@ func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, arg
 		return shim.Error(err.Error())
 	}
 
-	var pushlogs []PushLog
-	pushlogs = make([]PushLog, 0)
+	var pushlogs []datastructures.PushLog
+	pushlogs = make([]datastructures.PushLog, 0)
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
 			return shim.Error(err.Error())
 		}
 
-		var pushlog PushLog
+		var pushlog datastructures.PushLog
 		json.Unmarshal(queryResponse.Value, &pushlog)
 
 		pushlogs = append(pushlogs, pushlog)
