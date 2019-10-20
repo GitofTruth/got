@@ -39,16 +39,16 @@ func (le *LogsExplorer) OpenRepo(path string) (bool, error) {
 	if err != nil {
 		panic(err)
 	}
-	le.Repo = repo
+	le.GitRepo = repo
 	return true, nil
 }
 
 func (le *LogsExplorer) LoadLogs() bool {
-	if le.Repo != nil {
+	if le.GitRepo != nil {
 		ops := git.LogOptions{}
 		ops.All = true
 		ops.Order = git.LogOrderCommitterTime
-		logs, _ := le.Repo.Log(&ops)
+		logs, _ := le.GitRepo.Log(&ops)
 		le.Logs = logs
 		fmt.Println(logs)
 	}
