@@ -1,4 +1,4 @@
-package GoT
+package datastructures
 
 import (
 	"fmt"
@@ -10,8 +10,9 @@ import (
 )
 
 type LogsExplorer struct {
-	Repo *git.Repository
-	Logs object.CommitIter
+	GitRepo *git.Repository
+	Logs    object.CommitIter
+	GotRepo Repo
 }
 
 func CreateNewLogsExplorer(path string) (LogsExplorer, error) {

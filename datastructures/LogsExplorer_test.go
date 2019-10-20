@@ -1,4 +1,4 @@
-package GoT
+package datastructures
 
 import (
 	"fmt"
