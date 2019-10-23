@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	user   = ""
-	secret = ""
+	user   = "hkandil"
+	secret = "test-secret"
 )
 
 func enrollUser(sdk *fabsdk.FabricSDK) {
