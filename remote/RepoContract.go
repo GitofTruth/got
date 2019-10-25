@@ -1,7 +1,8 @@
-package remote
+package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/GitofTruth/GoT/datastructures"
 
@@ -67,9 +68,10 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 
 }
 
-func (contract *RepoContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
-	return shim.Success(nil)
-}
+//
+// func (contract *RepoContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
+// 	return shim.Success(nil)
+// }
 
 func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
@@ -99,4 +101,14 @@ func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, arg
 
 	pushlogsjson, _ := json.Marshal(pushlogs)
 	return shim.Success(pushlogsjson)
+}
+
+// The main function is only relevant in unit test mode. Only included here for completeness.
+func main() {
+
+	// Create a new Smart Contract
+	err := shim.Start(new(RepoContract))
+	if err != nil {
+		fmt.Printf("Error creating new Smart Contract: %s", err)
+	}
 }
