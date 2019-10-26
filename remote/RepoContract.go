@@ -27,9 +27,9 @@ func (contract *RepoContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Res
 	function, args := APIstub.GetFunctionAndParameters()
 
 	if function == "push" {
-		contract.addPush(APIstub, args)
+		return contract.addPush(APIstub, args)
 	} else if function == "getpushes" {
-		contract.getpushes(APIstub, args)
+		return contract.getpushes(APIstub, args)
 	} else if function == "addbranch" {
 
 	}
