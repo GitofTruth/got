@@ -6,5 +6,5 @@ import (
 )
 
 func TestPushLog(t *testing.T) {
-	fmt.Println("Starting Test \t\t RepoBranch")
+	fmt.Println("Starting Test \t\t PushLog")
 }
