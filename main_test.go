@@ -16,7 +16,7 @@ func TestBasicgroup(t *testing.T) {
 	fmt.Println("Starting Test \t\t Main")
 
 	fmt.Println("Reading connection profile..")
-	c := config.FromFile("/home/hkandil/fabric-samples/first-network/connection-org1.yaml")
+	c := config.FromFile("/home/hkandil/Desktop/Git of Truth/HLF-Dev-Chaincode-V1.4-1.3/network/config/core.yaml")
 	sdk, err := fabsdk.New(c)
 	if err != nil {
 		fmt.Printf("Failed to create new SDK: %s\n", err)
