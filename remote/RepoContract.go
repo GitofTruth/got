@@ -17,6 +17,8 @@ type RepoContract struct {
 
 //how to pass variables for initialization?
 func (contract *RepoContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
+	fmt.Println("initializing ledger")
+
 	contract.Repo, _ = datastructures.CreateNewRepo("", 0, nil)
 	contract.PushNumber = 0
 	return shim.Success(nil)
@@ -46,21 +48,30 @@ func (contract *RepoContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Res
 //need to generate hash as key instead of just the same object
 func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 1 {
+	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
+	//var commitLog = datastructures.CommitLog{Message: args[1], Author: args[2], Committer: args[3], Timestamp: args[4], Hash: args[5]}
+
 	//it should be Marshaled on submission
-	//pushAsBytes, _ := json.Marshal(args[0])
-	APIstub.PutState(string(contract.PushNumber), []byte(args[0]))
+	//pushAsBytes, _ := json.Marshal(commitLog)
+
+	APIstub.PutState(string(contract.PushNumber), []byte(args[1]))
 	contract.PushNumber = contract.PushNumber + 1
 
 	var pushLog datastructures.PushLog
 	json.Unmarshal([]byte(args[0]), &pushLog)
 
-	done, _ := contract.AddCommitLogs(pushLog.Logs, pushLog.BranchName)
+	// pushLog.BranchName = args[0]
+
+	//done, _ := contract.AddCommitLog(commitLog, args[0])
+
+	done := true
 
 	if done {
+		//APIstub.PutState(string(contract.PushNumber), pushAsBytes)
+
 		return shim.Success(nil)
 	}
 
@@ -75,6 +86,7 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 
 func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
+	fmt.Println("Querying the ledger..")
 	startKey := args[0]
 	endKey := args[1]
 
@@ -100,6 +112,8 @@ func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, arg
 	defer resultsIterator.Close()
 
 	pushlogsjson, _ := json.Marshal(pushlogs)
+
+	fmt.Println(pushlogs)
 	return shim.Success(pushlogsjson)
 }
 
