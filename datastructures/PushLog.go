@@ -2,10 +2,10 @@ package datastructures
 
 type PushLog struct {
 	BranchName string
-	Logs       map[string]CommitLog
+	Logs       []CommitLog
 }
 
-func CreateNewPushLog(branchname string, logs map[string]CommitLog) (PushLog, error) {
+func CreateNewPushLog(branchname string, logs []CommitLog) (PushLog, error) {
 	var pushLog PushLog
 	pushLog.BranchName = branchname
 	pushLog.Logs = logs
