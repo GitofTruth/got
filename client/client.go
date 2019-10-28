@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 
+	"github.com/GitofTruth/GoT/common"
 	"github.com/GitofTruth/GoT/datastructures"
 )
 
@@ -11,39 +12,47 @@ type Client struct {
 	LastPush   int
 	LocalRepo  datastructures.Repo
 	RemoteRepo datastructures.Repo
-}
-
-type ArgsList struct {
-	Args []string
-}
-
-func CreateNewArgsList(funcName string, args string) ArgsList {
-	var argsList ArgsList
-	argsList.Args = make([]string, 2)
-	argsList.Args[0] = funcName
-	argsList.Args[1] = args
-
-	return argsList
+	Explorer   datastructures.LogsExplorer
 }
 
 func CreateNewClient(lastPush int) (Client, error) {
 	var cli Client
 
-	cli.LocalRepo, _ = datastructures.CreateNewRepo("mickey", 0, nil)
-	//master, _ := datastructures.CreateNewRepoBranch("master", "mickey", 1, nil)
-	//user.LocalRepo.AddBranch(master)
-
-	//commit, _ := datastructures.CreateNewCommitLog("Testing the contract", "mickey", "mickey", 0, "COMMITHASH", nil, nil)
+	exp, err := datastructures.CreateNewLogsExplorer("")
+	if err != nil {
+		panic(err)
+	}
+	cli.Explorer = exp
+	cli.LocalRepo, _ = cli.Explorer.GetInternalRepo()
 
 	cli.LastPush = 0
-
 	return cli, nil
+}
+
+func (cli *Client) CreatePushMessage(m int) (string, error) {
+	branch := cli.LocalRepo.Branches["master"]
+	branchcommits := make([]datastructures.CommitLog, 0)
+
+	n := 0
+	for _, val := range branch.Logs {
+		if n == m {
+			break
+		}
+		branchcommits = append(branchcommits, val)
+		n = n + 1
+	}
+
+	push, _ := datastructures.CreateNewPushLog(branch.Name, branchcommits)
+	pushasbytes, _ := json.Marshal(push)
+	argsStr, _ := json.Marshal(common.CreateNewArgsList("push", string(pushasbytes)))
+
+	return string(argsStr), nil
 }
 
 func (cli *Client) CreateBranchMessage(branch *datastructures.RepoBranch) (string, error) {
 	master, _ := datastructures.CreateNewRepoBranch("master", "mickey", 1, nil)
 	masterasbytes, _ := json.Marshal(master)
-	argsStr, _ := json.Marshal(CreateNewArgsList("addBranch", string(masterasbytes)))
+	argsStr, _ := json.Marshal(common.CreateNewArgsList("addBranch", string(masterasbytes)))
 
 	return string(argsStr), nil
 }
@@ -54,7 +63,7 @@ func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (st
 	pushes[0] = commit
 	push, _ := datastructures.CreateNewPushLog("master", pushes)
 	pushasbytes, _ := json.Marshal(push)
-	argsStr, _ := json.Marshal(CreateNewArgsList("push", string(pushasbytes)))
+	argsStr, _ := json.Marshal(common.CreateNewArgsList("push", string(pushasbytes)))
 
 	return string(argsStr), nil
 }

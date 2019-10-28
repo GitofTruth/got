@@ -12,7 +12,6 @@ import (
 type LogsExplorer struct {
 	GitRepo *git.Repository
 	Logs    object.CommitIter
-	GotRepo Repo
 }
 
 func CreateNewLogsExplorer(path string) (LogsExplorer, error) {
@@ -50,10 +49,50 @@ func (le *LogsExplorer) LoadLogs() bool {
 		ops.Order = git.LogOrderCommitterTime
 		logs, _ := le.GitRepo.Log(&ops)
 		le.Logs = logs
-		fmt.Println(logs)
 	}
 	return true
 }
+
+func (le *LogsExplorer) GetInternalRepo() (Repo, error) {
+	//author first commit
+	//branch >> commits
+
+	le.LoadLogs()
+
+	if le.Logs != nil {
+		fmt.Println(le.Logs)
+	}
+
+	logs := make(map[string]CommitLog)
+	auth := ""
+	time := 0
+	for {
+		cmm, err := le.Logs.Next()
+		if err != nil {
+			break
+		}
+		parentHashes := make([]string, 0)
+		for _, hashplumb := range cmm.ParentHashes {
+			parentHashes = append(parentHashes, string([]byte(hashplumb[:])))
+		}
+		logs[string([]byte(cmm.Hash[:]))], _ = CreateNewCommitLog(cmm.Message, cmm.Author.Name, cmm.Committer.Name, cmm.Committer.When.Second(), string([]byte(cmm.Hash[:])), parentHashes, nil)
+		auth = cmm.Author.Name
+		time = cmm.Committer.When.Second()
+	}
+
+	//logs map[string]CommitLog
+	branch, _ := CreateNewRepoBranch("master", auth, time, logs)
+	branches := make(map[string]RepoBranch)
+	branches[branch.Name] = branch
+
+	return CreateNewRepo(auth, time, branches)
+}
+
+//get repo general info
+
+//get current branch info
+
+//get current branch logs
 
 func (le *LogsExplorer) PrintAllLogs() bool {
 	if le.Logs != nil {
