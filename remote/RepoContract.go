@@ -30,7 +30,11 @@ func (contract *RepoContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Res
 
 	if function == "push" {
 		return contract.addPush(APIstub, args)
+<<<<<<< HEAD
 	} else if function == "getbetween" {
+=======
+	} else if function == "getpushes" {
+>>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
 		return contract.getpushes(APIstub, args)
 	} else if function == "addbranch" {
 		return contract.addBranch(APIstub, args)
@@ -69,6 +73,7 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 	return shim.Error("Invalid push Log!")
 }
 
+<<<<<<< HEAD
 func (contract *RepoContract) addBranch(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
 	if len(args) != 2 {
@@ -86,6 +91,12 @@ func (contract *RepoContract) addBranch(APIstub shim.ChaincodeStubInterface, arg
 
 	return shim.Error("Invalid Branch")
 }
+=======
+//
+// func (contract *RepoContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
+// 	return shim.Success(nil)
+// }
+>>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
 
 //
 // func (contract *RepoContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
@@ -125,6 +136,7 @@ func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, arg
 	return shim.Success(pushlogsjson)
 }
 
+<<<<<<< HEAD
 func (contract *RepoContract) getbranches(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	fmt.Println("Querying the ledger..")
 
@@ -134,6 +146,8 @@ func (contract *RepoContract) getbranches(APIstub shim.ChaincodeStubInterface, a
 	return shim.Success(brancgesjson)
 }
 
+=======
+>>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
 // The main function is only relevant in unit test mode. Only included here for completeness.
 func main() {
 

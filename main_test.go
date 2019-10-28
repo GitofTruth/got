@@ -10,8 +10,19 @@ import (
 func TestBasicgroup(t *testing.T) {
 	fmt.Println("Starting Test \t\t Main")
 
+<<<<<<< HEAD
 	cli, _ := client.CreateNewClient(0)
 	str, _ := cli.CreateBranchMessage(nil)
+=======
+	fmt.Println("Reading connection profile..")
+	c := config.FromFile("/home/hkandil/Desktop/Git of Truth/HLF-Dev-Chaincode-V1.4-1.3/network/config/core.yaml")
+	sdk, err := fabsdk.New(c)
+	if err != nil {
+		fmt.Printf("Failed to create new SDK: %s\n", err)
+		os.Exit(1)
+	}
+	defer sdk.Close()
+>>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
 
 	fmt.Println(str)
 
