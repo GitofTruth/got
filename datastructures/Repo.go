@@ -14,16 +14,15 @@ func CreateNewRepo(author string, timestamp int, branches map[string]RepoBranch)
 	repo.Timestamp = timestamp
 	repo.CommitHashes = make(map[string]struct{})
 
-	for _, branch := range branches {
-		for _, log := range branch.Logs {
-			repo.AddCommitHash(log)
-		}
-	}
-
 	if branches == nil {
 		repo.Branches = make(map[string]RepoBranch)
 	} else {
 		repo.Branches = branches
+		for _, branch := range branches {
+			for _, log := range branch.Logs {
+				repo.AddCommitHash(log)
+			}
+		}
 	}
 
 	return repo, nil
@@ -37,6 +36,15 @@ func (repo *Repo) IsCommitHash(hashName string) bool {
 func (repo *Repo) IsBranch(branchName string) bool {
 	_, exist := repo.Branches[branchName]
 	return exist
+}
+
+func (repo *Repo) GetBranches() []string {
+
+	keys := make([]string, 0, len(repo.Branches))
+	for k := range repo.Branches {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 //checks that all hash parents are hashes
