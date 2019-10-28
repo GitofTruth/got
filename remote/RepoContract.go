@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/GitofTruth/GoT/datastructures"
 
@@ -11,17 +12,34 @@ import (
 )
 
 type RepoContract struct {
-	datastructures.Repo
-	PushNumber int
 }
 
 //how to pass variables for initialization?
 func (contract *RepoContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
 	fmt.Println("initializing ledger")
-
-	contract.Repo, _ = datastructures.CreateNewRepo("", 0, nil)
-	contract.PushNumber = 0
+	pushNumber := 0
+	pushNumberBytes, _ := json.Marshal(pushNumber)
+	APIstub.PutState("PushNumber", pushNumberBytes)
+	fmt.Println("Ledger initalized push number is ")
+	fmt.Println(pushNumberBytes)
 	return shim.Success(nil)
+}
+
+func (contract *RepoContract) getCurrentRepoState(APIstub shim.ChaincodeStubInterface) (datastructures.Repo, int) {
+	repo, _ := datastructures.CreateNewRepo("", 0, nil)
+	master, _ := datastructures.CreateNewRepoBranch("master", "client", 0, nil)
+	repo.AddBranch(master)
+	pushes := contract.getAllPushes(APIstub)
+
+	for _, push := range pushes {
+		repo.AddCommitLogs(push.Logs, push.BranchName)
+	}
+
+	pushNumberBytes, _ := APIstub.GetState("PushNumber")
+	var pushNumber int
+	json.Unmarshal(pushNumberBytes, &pushNumber)
+
+	return repo, pushNumber
 }
 
 func (contract *RepoContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response {
@@ -30,15 +48,11 @@ func (contract *RepoContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Res
 
 	if function == "push" {
 		return contract.addPush(APIstub, args)
-<<<<<<< HEAD
-	} else if function == "getbetween" {
-=======
-	} else if function == "getpushes" {
->>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
-		return contract.getpushes(APIstub, args)
-	} else if function == "addbranch" {
+	} else if function == "getBetween" {
+		return contract.getPushes(APIstub, args)
+	} else if function == "addBranch" {
 		return contract.addBranch(APIstub, args)
-	} else if function == "getbranches" {
+	} else if function == "getBranches" {
 		return contract.getBranches(APIstub, args)
 	}
 
@@ -58,58 +72,92 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
+	repo, pushNumber := contract.getCurrentRepoState(APIstub)
+
 	//it should be Marshaled on submission
 	//pushAsBytes, _ := json.Marshal(args[1]) //changes from json object to bytes (string)
+
 	var pushLog datastructures.PushLog
 	json.Unmarshal([]byte(args[0]), &pushLog)
 
-	if done, _ := contract.AddCommitLogs(pushLog.Logs, pushLog.BranchName); done {
-		APIstub.PutState(string(contract.PushNumber), []byte(args[0]))
-		contract.PushNumber = contract.PushNumber + 1
-
+	if done, _ := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName); done {
+		startKeyBytes, _ := json.Marshal(pushNumber)
+		APIstub.PutState(string(startKeyBytes), []byte(args[0]))
+		pushNumber = pushNumber + 1
+		pushNumberBytes, _ := json.Marshal(pushNumber)
+		APIstub.PutState("PushNumber", pushNumberBytes)
 		return shim.Success(nil)
 	}
 
 	return shim.Error("Invalid push Log!")
 }
 
-<<<<<<< HEAD
 func (contract *RepoContract) addBranch(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 2 {
+	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
+	repo, _ := contract.getCurrentRepoState(APIstub)
+
 	var branch datastructures.RepoBranch
 	json.Unmarshal([]byte(args[0]), &branch)
+	fmt.Println("unmarshaling done!")
+	fmt.Println(branch)
 
-	if done, _ := contract.AddBranch(branch); done {
+	if done, _ := repo.AddBranch(branch); done {
 		fmt.Println("New branch added:\t" + branch.Name)
-		APIstub.PutState(branch.Name, []byte(branchAsBytes))
+		APIstub.PutState(branch.Name, []byte(args[0]))
 		return shim.Success(nil)
 	}
 
 	return shim.Error("Invalid Branch")
 }
-=======
-//
-// func (contract *RepoContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
-// 	return shim.Success(nil)
-// }
->>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
 
 //
 // func (contract *RepoContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 // 	return shim.Success(nil)
 // }
 
-func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (contract *RepoContract) getAllPushes(APIstub shim.ChaincodeStubInterface) []datastructures.PushLog {
+
+	startKeyBytes, _ := json.Marshal(0)
+	endKeyBytes, _ := APIstub.GetState("PushNumber")
+
+	resultsIterator, err := APIstub.GetStateByRange(string(startKeyBytes), string(endKeyBytes))
+	if err != nil {
+		return make([]datastructures.PushLog, 0)
+	}
+
+	var pushlogs []datastructures.PushLog
+	pushlogs = make([]datastructures.PushLog, 0)
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return make([]datastructures.PushLog, 0)
+		}
+
+		var pushlog datastructures.PushLog
+		json.Unmarshal(queryResponse.Value, &pushlog)
+
+		pushlogs = append(pushlogs, pushlog)
+	}
+
+	defer resultsIterator.Close()
+	return pushlogs
+}
+
+func (contract *RepoContract) getPushes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
 	fmt.Println("Querying the ledger..")
-	startKey := args[0]
-	endKey := args[1]
 
-	resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
+	startKey, _ := strconv.Atoi(args[0])
+	endKey, _ := strconv.Atoi(args[1])
+
+	startKeyBytes, _ := json.Marshal(startKey)
+	endKeyBytes, _ := json.Marshal(endKey)
+
+	resultsIterator, err := APIstub.GetStateByRange(string(startKeyBytes), string(endKeyBytes))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -136,18 +184,16 @@ func (contract *RepoContract) getpushes(APIstub shim.ChaincodeStubInterface, arg
 	return shim.Success(pushlogsjson)
 }
 
-<<<<<<< HEAD
-func (contract *RepoContract) getbranches(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (contract *RepoContract) getBranches(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	fmt.Println("Querying the ledger..")
+	repo, _ := contract.getCurrentRepoState(APIstub)
 
-	brancgesjson, _ := json.Marshal(contract.GetBranches())
+	brancgesjson, _ := json.Marshal(repo.GetBranches())
 
 	fmt.Println(brancgesjson)
 	return shim.Success(brancgesjson)
 }
 
-=======
->>>>>>> 42d67e3d645f7808585e85a82816ff0c8dafd61f
 // The main function is only relevant in unit test mode. Only included here for completeness.
 func main() {
 
