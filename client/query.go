@@ -1,5 +1,6 @@
 package client
 
+/*
 import (
 	"fmt"
 
@@ -26,3 +27,4 @@ func queryCC(client *channel.Client, name []byte) string {
 	fmt.Println("Payload: ", ret)
 	return ret
 }
+*/

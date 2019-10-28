@@ -1,5 +1,6 @@
 package client
 
+/*
 import (
 	"fmt"
 
@@ -23,3 +24,4 @@ func invokeCC(client *channel.Client, newValue string) {
 		fmt.Printf("Failed to invoke: %+v\n", err)
 	}
 }
+*/

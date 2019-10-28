@@ -1,5 +1,6 @@
 package client
 
+/*
 import (
 	"fmt"
 
@@ -36,3 +37,4 @@ func enrollUser(sdk *fabsdk.FabricSDK) {
 		fmt.Printf("User %s already enrolled, skip enrollment.\n", user)
 	}
 }
+*/
