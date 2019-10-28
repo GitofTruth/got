@@ -1,4 +1,4 @@
-package GoT
+package main
 
 import (
 	"fmt"

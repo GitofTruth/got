@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/GitofTruth/GoT/client"
+)
 
 func main() {
-	fmt.Println("hello world to GoT -Hassan")
+
+	cli, _ := client.CreateNewClient(0)
+	str, _ := cli.CreateBranchMessage(nil)
+	fmt.Println(str)
+
 }
