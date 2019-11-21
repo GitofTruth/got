@@ -1,5 +1,7 @@
 package datastructures
 
+import "fmt"
+
 type Repo struct {
 	Author       string                `json:"author"`
 	Timestamp    int                   `json:"timestamp"`
@@ -15,6 +17,7 @@ func CreateNewRepo(author string, timestamp int, branches map[string]RepoBranch)
 	repo.CommitHashes = make(map[string]struct{})
 
 	if branches == nil {
+		fmt.Println("empty branch is created!")
 		repo.Branches = make(map[string]RepoBranch)
 	} else {
 		repo.Branches = branches
@@ -24,6 +27,8 @@ func CreateNewRepo(author string, timestamp int, branches map[string]RepoBranch)
 			}
 		}
 	}
+
+	fmt.Println("empty repo is created!")
 
 	return repo, nil
 }
@@ -142,6 +147,7 @@ func (repo *Repo) AddCommitLog(commitLog CommitLog, branchName string) (bool, er
 
 //What if not all the commits were added? rolling back?
 func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string) (bool, error) {
+	return true, nil
 
 	if valid, _ := repo.ValidCommitLogs(commitLogs, branchName); valid {
 
@@ -164,8 +170,10 @@ func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string) (bool
 }
 
 func (repo *Repo) AddBranch(branch RepoBranch) (bool, error) {
+	fmt.Println("Trying to add new branch ")
 
 	if valid, _ := repo.ValidBranch(branch); valid {
+		fmt.Println("New branch is valid!")
 
 		repo.Branches[branch.Name] = branch
 		for _, log := range branch.Logs {

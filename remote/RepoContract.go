@@ -78,6 +78,7 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 	//pushAsBytes, _ := json.Marshal(args[1]) //changes from json object to bytes (string)
 
 	var pushLog datastructures.PushLog
+	fmt.Println("trying to process:\t", args[0])
 	json.Unmarshal([]byte(args[0]), &pushLog)
 
 	if done, _ := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName); done {
