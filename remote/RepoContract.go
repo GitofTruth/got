@@ -68,7 +68,7 @@ func (contract *RepoContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Res
 //need to generate hash as key instead of just the same object
 func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 1 {
+	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
 
