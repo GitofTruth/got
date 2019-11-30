@@ -12,3 +12,5 @@
 *.out
 
 /client/node_modules
+
+/client/user-wallet/
