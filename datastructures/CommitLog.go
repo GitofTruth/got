@@ -6,7 +6,7 @@ type CommitLog struct {
 	Committer    string   `json:"committer"`
 	Timestamp    int      `json:"timestamp"`
 	Hash         string   `json:"hash"`
-	Parenthashes []string `json:"parenthash"`
+	Parenthashes []string `json:"parenthashes"`
 	Signature    []byte   `json:"signature"`
 }
 

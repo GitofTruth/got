@@ -1,6 +1,9 @@
+
 /**
  * Demonstrates the use of Gateway Network & Contract classes
  */
+
+
 
  // Needed for reading the connection profile as JS object
 const fs = require('fs');
@@ -26,35 +29,23 @@ const gitlog = require('gitlog');
 const repoPath = '/home/hkandil/Desktop/Git of Truth/HLF-Dev-Chaincode-V1.4-1.3/gocc/src/github.com/GitofTruth/GoT';
 
 const options =
-    { repo: repoPath
-    , number: 1
-    , fields:
-      [ 'subject'
-      , 'authorName'
-      , 'committerName'
-      , 'hash'
-      , 'parentHashes'
-      ]
-    , execOptions:
-      { maxBuffer: 1000 * 1024,
-        status: false
-      }
-    };
+{ repo: repoPath
+, number: 1
+, fields:
+  [ 'subject'
+  , 'authorName'
+  , 'committerName'
+  , 'hash'
+  , 'parentHashes'
+  ]
+, execOptions:
+  { maxBuffer: 1000 * 1024,
+    status: false
+  }
+};
 
-let commObj = {
-    Message : "ya wad",
-	Author :"Mickey",
-	Committer  :"",
-	Timestamp  :0, 
-	Hash      :"",
-	Parenthashes :null,
-	Signature   : null
-}
 
-let pushObj = {
-    BranchName : "master",
-    logs : [commObj]
-}
+
 
 // 1. Create an instance of the gatway
 const gateway = new Gateway();
@@ -83,6 +74,22 @@ async function main() {
     let commits = gitlog(options);
     console.log(commits[0]);
 
+
+    let commObj = {
+     Message : commits[0].subject,
+	 Author : commits[0].authorName,
+	 Committer  : commits[0].committerName,
+     Timestamp  : 0, 
+	 Hash      : commits[0].hash,
+	 Parenthashes : [commits[0].parentHashes],
+	 Signature   : null
+    }
+
+    let pushObj = {
+        BranchName : "master",
+        logs : [commObj]
+    }
+
     let pushlog = JSON.stringify(pushObj);
 
     //pushObj.logs[0]
@@ -91,12 +98,12 @@ async function main() {
 
     // 7. Execute the transaction
     console.log(pushlog)
-    await submitTxnContract(contract,pushlog)
+     await submitTxnContract(contract,pushlog)
     // Must give delay or use await here otherwise Error=MVCC_READ_CONFLICT
     // await submitTxnContract(contract)
 
     // Query the chaincode
-    await queryContract(contract)
+   await queryContract(contract)
 
 
 }

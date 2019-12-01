@@ -174,14 +174,17 @@ func (contract *RepoContract) getPushes(APIstub shim.ChaincodeStubInterface, arg
 		var pushlog datastructures.PushLog
 		json.Unmarshal(queryResponse.Value, &pushlog)
 
+		fmt.Println("trying to query:\t", pushlog)
+
 		pushlogs = append(pushlogs, pushlog)
 	}
 
 	defer resultsIterator.Close()
 
+	fmt.Println("pushlogs before json marshalling: ", pushlogs)
+
 	pushlogsjson, _ := json.Marshal(pushlogs)
 
-	fmt.Println(pushlogs)
 	return shim.Success(pushlogsjson)
 }
 
