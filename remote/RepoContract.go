@@ -84,9 +84,11 @@ func (contract *RepoContract) addPush(APIstub shim.ChaincodeStubInterface, args 
 	if done, _ := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName); done {
 		startKeyBytes, _ := json.Marshal(pushNumber)
 		APIstub.PutState(string(startKeyBytes), []byte(args[0]))
+
 		pushNumber = pushNumber + 1
 		pushNumberBytes, _ := json.Marshal(pushNumber)
 		APIstub.PutState("PushNumber", pushNumberBytes)
+
 		return shim.Success(nil)
 	}
 

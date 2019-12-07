@@ -16,9 +16,9 @@ const yaml = require('js-yaml');
 const { Gateway, FileSystemWallet, DefaultEventHandlerStrategies, Transaction  } = require('fabric-network');
 
 // Constants for profile
-const CONNECTION_PROFILE_PATH = '../../profiles/dev-connection.yaml'
+const CONNECTION_PROFILE_PATH = 'profiles/dev-connection.yaml'
 // Path to the wallet
-const FILESYSTEM_WALLET_PATH = '../../client/user-wallet'
+const FILESYSTEM_WALLET_PATH = 'client/user-wallet'
 // Identity context used
 const USER_ID = 'Admin@acme.com'
 // Channel name
@@ -29,10 +29,10 @@ const CONTRACT_ID = "GoT"
 //Git Log Parser
 const gitlog = require('gitlog');
 
-const repoPath = '/home/hkandil/Desktop/Git of Truth/HLF-Dev-Chaincode-V1.4-1.3/gocc/src/github.com/GitofTruth/GoT';
+//const repoPath = '/home/hkandil/Desktop/Git of Truth/HLF-Dev-Chaincode-V1.4-1.3/gocc/src/github.com/GitofTruth/GoT';
 
 const options =
-{ repo: repoPath
+{ repo: __dirname  
 , number: 1
 , fields:
   [ 'subject'
@@ -40,6 +40,7 @@ const options =
   , 'committerName'
   , 'hash'
   , 'parentHashes'
+  , 'committerDate'
   ]
 , execOptions:
   { maxBuffer: 1000 * 1024,
@@ -77,16 +78,21 @@ async function main() {
     let commits = gitlog(options);
     console.log(commits[0]);
 
+    
+    var unixTimestamp = Math.round(new Date(commits[0].committerDate).getTime()/1000);
+    console.log(unixTimestamp);
+
 
     let commObj = {
      Message : commits[0].subject,
 	 Author : commits[0].authorName,
 	 Committer  : commits[0].committerName,
-     Timestamp  : 0, 
+     CommitterTimestamp  : unixTimestamp, 
 	 Hash      : commits[0].hash,
 	 Parenthashes : [commits[0].parentHashes],
 	 Signature   : null
     }
+
 
     let pushObj = {
         BranchName : "master",
