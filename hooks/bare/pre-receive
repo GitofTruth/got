@@ -1,0 +1,164 @@
+#!/usr/bin/env node
+
+// goes to bare
+// fetch from local storage
+// hopefully executed on pull command
+
+
+const fs = require('fs');
+const { join } = require("path")
+
+let testpath = ".git/objects/"
+let defStoragePath = "../../Storage/"
+let excptList = ["info", "pack"]
+
+
+function ListFiles(testFolder){
+  let files = []
+  fs.readdirSync(testFolder).forEach(file => {
+    if( excptList.indexOf(file) > -1){
+    }else {
+      files = [... files, file]
+      // console.log(file);
+    }
+  });
+
+  return files
+}
+
+
+function GetObjectsName(objHomeDirectory) {
+  let names = []
+  let dirs = ListFiles(objHomeDirectory)
+  dirs.forEach(d => {
+    files = ListFiles(objHomeDirectory + d + "/")
+    files.forEach(f => {
+      names = [...names, d + f]
+    })
+  })
+
+  return names;
+}
+
+function CopyObjects(namesList = [],pulling = true, storagePath = defStoragePath){
+  let localObjsPath = "objects/"
+  if (!pulling){
+    let temp = storagePath
+    storagePath = localObjsPath
+    localObjsPath = temp
+  }
+
+  console.log(storagePath)
+  console.log(localObjsPath)
+  let localObjs = GetObjectsName(storagePath)
+  let missing = []
+
+  if (namesList.length > 0){
+    namesList.forEach(n => {
+      if(localObjs.indexOf(n) <= -1){
+        missing = [...missing, n]
+      }
+    })
+  }{
+    missing = localObjs
+  }
+
+  console.log(localObjs)
+  console.log(missing)
+
+  missing.forEach( m => {
+    if (!fs.existsSync(localObjsPath + m.substring(0,2))){
+      fs.mkdirSync(localObjsPath + m.substring(0,2));
+    }
+    if(!fs.existsSync(localObjsPath + m.substring(0,2) + "/" + m.substring(2))){
+      fs.copyFileSync(storagePath + m.substring(0,2) + "/" + m.substring(2), localObjsPath + m.substring(0,2) + "/" + m.substring(2)
+      // , (err) => {
+      // if (err) throw err;
+      // console.log(m + " was added to bare repo");
+      // }
+    );
+    }
+  })
+}
+
+
+
+const fs = require('fs');
+const yaml = require('js-yaml');
+const { Gateway, FileSystemWallet, DefaultEventHandlerStrategies, Transaction  } = require('fabric-network');
+const gitlog = require('gitlog');
+
+const CONNECTION_PROFILE_PATH = '../profiles/dev-connection.yaml'
+const FILESYSTEM_WALLET_PATH = '../client/user-wallet'
+
+const USER_ID = 'Admin@acme.com'
+const NETWORK_NAME = 'airlinechannel'
+const CONTRACT_ID = "GoT"
+
+const gateway = new Gateway();
+
+
+
+async function main() {
+  CopyObjects()
+  await setupGateway()
+
+  let network = await gateway.getNetwork(NETWORK_NAME)
+  const contract = await network.getContract(CONTRACT_ID);
+  let h = await queryContract(contract)
+
+  fs.writeFile("refs/heads/master", h)
+
+  process.exit(0);
+}
+
+/**
+ * Queries the chaincode
+ * @param {object} contract
+ */
+async function queryContract(contract){
+    try{
+        // Query the chaincode
+        let response = await contract.evaluateTransaction('getBetween', '0', '100')
+        console.log(`Query Response=${response.toString()}`)
+
+        ////////////////////////////////////////////////////
+        /////////// If there is a bug, it is here///////////
+        ////////////////////////////////////////////////////
+        return response[response.length -1].hash
+
+    } catch(e){
+        console.log(e)
+        return ""
+    }
+}
+
+async function setupGateway() {
+
+    // 2.1 load the connection profile into a JS object
+    let connectionProfile = yaml.safeLoad(fs.readFileSync(CONNECTION_PROFILE_PATH, 'utf8'));
+
+    // 2.2 Need to setup the user credentials from wallet
+    const wallet = new FileSystemWallet(FILESYSTEM_WALLET_PATH)
+
+    // 2.3 Set up the connection options
+    let connectionOptions = {
+        identity: USER_ID,
+        wallet: wallet,
+        discovery: { enabled: false, asLocalhost: true }
+        /*** Uncomment lines below to disable commit listener on submit ****/
+        // , eventHandlerOptions: {
+        //     strategy: null
+        // }
+    }        /*** Uncomment lines below to disable commit listener on submit ****/
+    // , eventHandlerOptions: {
+    //     strategy: null
+    // }
+
+    // 2.4 Connect gateway to the network
+    await gateway.connect(connectionProfile, connectionOptions)
+    // console.log( gateway)
+}
+
+
+main()
