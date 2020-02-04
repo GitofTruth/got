@@ -1,0 +1,13 @@
+{
+    "index": {
+        "fields": [
+            "repoID",
+            "branchName",
+            "hash",
+            "SignatureByte"
+        ]
+    },
+    "ddoc": "index-CommitSignatureByte",
+    "name": "index-CommitSignatureByte",
+    "type": "json"
+}

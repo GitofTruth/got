@@ -3,6 +3,7 @@ package datastructures
 import "fmt"
 
 type Repo struct {
+	Name		 string                `json:"repoName"`
 	Author       string                `json:"author"`
 	Timestamp    int                   `json:"timestamp"`
 	CommitHashes map[string]struct{}   `json:"hashes"`

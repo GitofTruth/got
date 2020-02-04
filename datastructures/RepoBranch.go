@@ -1,7 +1,7 @@
 package datastructures
 
 type RepoBranch struct {
-	Name      string               `json:"name"`
+	Name      string               `json:"branchName"`
 	Author    string               `json:"author"`
 	Timestamp int                  `json:"timestamp"`
 	Logs      map[string]CommitLog `json:"logs"`
