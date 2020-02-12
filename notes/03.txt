@@ -1,0 +1,43 @@
+//Do not forget the tableName
+
+
+Repo:
+	AddNewRepo (repoID , repoID - repoName - author -timestamp) [AddNewBranch ([])]
+
+
+Other:
+AddRepoHash (repoID - hash, repoID - hash)                  	// hash == boolean? no to enable rich queries
+
+Branch:
+	AddNewBranch (repoID - branchName , repoID- branchName - Author -Timestamp) [AddCommits([]), AddCommitParentHashes([])]
+
+	AddCommits 	(repoID - branchName - Hash , repoID - branchName - Hash - Message - Author - Committer - CommitterTimeStamp - Signature) []
+
+	AddCommitParentHashes (repoID - branchName - Hash - parentHash, repoID - branchName - Hash - parentHash)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+queryRepo
+queryBranch
+
+queryRepoHashes
+queryCommits
+
+
+
+
+
+AddCollabrator

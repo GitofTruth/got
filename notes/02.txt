@@ -1,0 +1,50 @@
+Repo
+	repoID
+	******	
+	repoName
+	author
+	timestamp
+	
+RepoHashes
+	repoID	
+	hash
+	******
+
+
+Branch
+	repoID
+	branchName
+	******
+	author
+	timeStamp
+	
+BranchCommits
+	repoID
+	branchName
+	hash
+	******
+	message
+	author
+	committer
+	committerTimestamp
+	
+	
+CommitParenthashes
+	repoID
+	branchName
+	hash
+	parentHash
+	******
+	
+
+
+
+
+########################
+CommitSignatureByte
+	repoID
+	branchName
+	hash
+	******
+	SignatureByte
+	
