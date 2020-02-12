@@ -62,10 +62,8 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 	return shim.Error("Invalid Smart Contract function name.")
 }
 
-func(contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface) peer.Response {
 
-	
-}
+
 
 func (contract *RepoContract) getCurrentRepoState(stub shim.ChaincodeStubInterface) (datastructures.Repo, int) {
 	repo, _ := datastructures.CreateNewRepo("", 0, nil)
