@@ -1,9 +1,10 @@
 {
     "index": {
         "fields": [
+            "tableName",
             "repoID",
             "branchName",
-            
+
             "author",
             "timestamp"
         ]

@@ -1,8 +1,9 @@
 {
     "index": {
         "fields": [
+            "tableName",
             "repoID",
-            
+
             "hash"
         ]
     },

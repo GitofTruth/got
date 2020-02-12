@@ -1,10 +1,11 @@
 {
     "index": {
         "fields": [
+            "tableName",
             "repoID",
             "branchName",
             "hash",
-            
+
             "parentHash"
         ]
     },
