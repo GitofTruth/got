@@ -1,0 +1,25 @@
+{
+    "repoName": "testRepo",
+    "author": "Hassan",
+    "timestamp": 0
+}
+
+{
+    "repoName": "GoT",
+    "author": "author",
+    "hashes":{
+        "hash1":{},
+        "hash2":{}
+    },
+
+    "branches":{
+        "branch1":{
+            
+        }
+    }
+
+}
+
+{
+
+}

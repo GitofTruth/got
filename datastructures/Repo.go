@@ -1,21 +1,30 @@
 package datastructures
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type Repo struct {
-	Name		 string                `json:"repoName"`
+	Name         string                `json:"repoName"`
 	Author       string                `json:"author"`
 	Timestamp    int                   `json:"timestamp"`
 	CommitHashes map[string]struct{}   `json:"hashes"`
 	Branches     map[string]RepoBranch `json:"branches"`
 }
 
-func CreateNewRepo(author string, timestamp int, branches map[string]RepoBranch) (Repo, error) {
+func CreateNewRepo(name string, author string, timestamp int, branches map[string]RepoBranch) (Repo, error) {
 	var repo Repo
 
+	repo.Name = name
 	repo.Author = author
 	repo.Timestamp = timestamp
 	repo.CommitHashes = make(map[string]struct{})
+
+	// the first commit
+	var empty struct{}
+	repo.CommitHashes["0000000000000000000000000000000000000000"] = empty
+	//check what is built on this hash
 
 	if branches == nil {
 		fmt.Println("empty branch is created!")
@@ -30,6 +39,32 @@ func CreateNewRepo(author string, timestamp int, branches map[string]RepoBranch)
 	}
 
 	fmt.Println("empty repo is created!")
+
+	return repo, nil
+}
+
+func UnmarashalRepo(objectString string) (Repo, error) {
+	var unmarashaledRepo Repo
+	json.Unmarshal([]byte(objectString), &unmarashaledRepo)
+
+	repo, _ := CreateNewRepo(unmarashaledRepo.Name, unmarashaledRepo.Author, unmarashaledRepo.Timestamp, nil)
+
+	// var repo Repo
+
+	// repo.Name = unmarashaledRepo.Name
+	// repo.Author = unmarashaledRepo.Author
+	// repo.Timestamp = unmarashaledRepo.Timestamp
+
+	// repo.CommitHashes = make(map[string]struct{})
+	// repo.Branches = make(map[string]RepoBranch)
+
+	for _, branch := range unmarashaledRepo.Branches {
+		newBranch, _ := CreateNewRepoBranch(branch.Name, branch.Author, branch.Timestamp, nil)
+		repo.AddBranch(newBranch)
+		for _, log := range branch.Logs {
+			repo.AddCommitLog(log, branch.Name)
+		}
+	}
 
 	return repo, nil
 }

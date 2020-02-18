@@ -6,7 +6,7 @@ Repo:
 
 
 Other:
-AddRepoHash (repoID - hash, repoID - hash)                  	// hash == boolean? no to enable rich queries
+	AddRepoHash (repoID - hash, repoID - hash)                  	// hash == boolean? no to enable rich queries
 
 Branch:
 	AddNewBranch (repoID - branchName , repoID- branchName - Author -Timestamp) [AddCommits([]), AddCommitParentHashes([])]

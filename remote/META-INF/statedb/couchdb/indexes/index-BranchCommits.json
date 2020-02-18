@@ -12,7 +12,7 @@
             "CommitterTimestamp"
         ]
     },
-    "ddoc": "index-BranchLogs",
-    "name": "index-BranchLogs",
+    "ddoc": "index-BranchCommits",
+    "name": "index-BranchCommits",
     "type": "json"
 }

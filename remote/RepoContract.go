@@ -38,25 +38,26 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 
 	if function == "addNewRepo" {
 		return contract.addNewRepo(stub, args)
-	} else if function == "addNewBranch" {
-		return contract.addNewBranch(stub, args)
-	} else if function == "addCommits" {
-		return contract.addCommits(stub, args)
-	} else if function == "addCollabrator" {
-		return contract.addCollabrator(stub, args)
 	}
+	//  else if function == "addNewBranch" {
+	// 	return contract.addNewBranch(stub, args)
+	// } else if function == "addCommits" {
+	// 	return contract.addCommits(stub, args)
+	// } else if function == "addCollabrator" {
+	// 	return contract.addCollabrator(stub, args)
+	// }
 
-	else if function == "queryRepo" {
-		return contract.queryRepo(stub, args)
-	} else if function == "queryBranch" {
-		return contract.queryBranch(stub, args)
-	} else if function == "queryRepoHashes" {
-		return contract.queryRepoHashes(stub, args)
-	} else if function == "queryCommits" {
-		return contract.queryCommits(stub, args)
-	} else if function == "queryCollabrators" {
-		return contract.queryCollabrators(stub, args)
-	}
+	// else if function == "queryRepo" {
+	// 	return contract.queryRepo(stub, args)
+	// } else if function == "queryBranch" {
+	// 	return contract.queryBranch(stub, args)
+	// } else if function == "queryRepoHashes" {
+	// 	return contract.queryRepoHashes(stub, args)
+	// } else if function == "queryCommits" {
+	// 	return contract.queryCommits(stub, args)
+	// } else if function == "queryCollabrators" {
+	// 	return contract.queryCollabrators(stub, args)
+	// }
 
 
 	return shim.Error("Invalid Smart Contract function name.")
