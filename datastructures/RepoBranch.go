@@ -7,7 +7,7 @@ type RepoBranch struct {
 	Logs      map[string]CommitLog `json:"logs"`
 }
 
-func CreateNewRepoBranch(name string, author string, timestamp int, logs map[string]CommitLog) (RepoBranch, error) {
+func CreateNewRepoBranch(name string, author string, timestamp int, logs map[string] CommitLog) (RepoBranch, error) {
 	var repoBranch RepoBranch
 	repoBranch.Name = name
 	repoBranch.Author = author

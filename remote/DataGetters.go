@@ -2,13 +2,12 @@ package main
 
 import(
   "fmt"
+  "encoding/json"
 
   "github.com/hyperledger/fabric/core/chaincode/shim"
   "github.com/hyperledger/fabric/protos/peer"
-  "github.com/hyperledger/fabric/protos/ledger/queryresult"
 
 
-  "strconv"
 )
 
 
@@ -20,7 +19,10 @@ func(contract *RepoContract) getRepo(stub shim.ChaincodeStubInterface, args []st
 	}
 
   repoHash := GetRepoKey(args[0], args[1])
-  repoData, err := stub.GetState(repoHash)
+  repoKey, _ := json.Marshal(repoHash)
+
+  repoData, err := stub.GetState(string(repoKey))
+
   if err != nil{
     return shim.Error("Repo does not exist")
   }

@@ -57,7 +57,7 @@ func (cli *Client) CreateBranchMessage(branch *datastructures.RepoBranch) (strin
 	return string(argsStr), nil
 }
 
-func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (string, error) {
+func (cli * Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (string, error) {
 	commit, _ := datastructures.CreateNewCommitLog("Testing the contract", "mickey", "mickey", 0, "COMMITHASH", nil, nil)
 	pushes := make([]datastructures.CommitLog, 1)
 	pushes[0] = commit
@@ -67,6 +67,18 @@ func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (st
 
 	return string(argsStr), nil
 }
+
+func (cli * Client) CreateAddNewRepoMessage() string {
+
+	x, _ := datastructures.CreateNewRepo("GoT", "mickey", 0, nil)
+	str, _ := json.Marshal(x)
+
+	argsStr, _ := json.Marshal(common.CreateNewArgsList("addNewRepo", string(str)))
+
+
+	return string(argsStr)
+}
+
 
 //to invoke
 //peer chaincode invoke -o "$ORDERER_ADDRESS" -C "$CC_CHANNEL_ID" -n "$CC_NAME"  -c "$CC_INVOKE_ARGS"

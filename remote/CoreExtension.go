@@ -1,21 +1,23 @@
 package main
 
 import (
-	"github.com/GitofTruth/GoT/datastructures"
+  "github.com/GitofTruth/GoT/datastructures"
+  
+  "fmt"
 
 	"crypto/sha256"
 	"encoding/json"
 )
 
-func (repo *datastructures.Repo) GenerateRepoDBPair() (string, []byte) {
+func GenerateRepoDBPair(repo datastructures.Repo) (string, []byte) {
 
-	repoHash := GetRepoKey(repo.author, repo.Name)
+	repoHash := GetRepoKey(repo.Author, repo.Name)
 
 	repoData := map[string]interface{}{"repoName": repo.Name, "author": repo.Author, "timestamp": repo.Timestamp}
 
 	jsonData, _ := json.Marshal(repoData)
 
-	return repoHash, repoData
+	return repoHash, jsonData
 }
 
 func GetRepoKey(author string, repoName string) string {
@@ -24,7 +26,9 @@ func GetRepoKey(author string, repoName string) string {
 	js, _ := json.Marshal(data)
 
 	repoHash := sha256.New()
-	repoHash.Write(js)
+  repoHash.Write(js)
+  
+  fmt.Println("Repo Hash: " + string(repoHash.Sum(nil)))
 
-	return repoHash.Sum(nil)
+	return string(repoHash.Sum(nil))
 }

@@ -15,7 +15,7 @@ type RepoContract struct {
 }
 
 //how to pass variables for initialization?
-func (contract *RepoContract) Init(stub shim.ChaincodeStubInterface) peer.Response {
+func (contract * RepoContract) Init(stub shim.ChaincodeStubInterface) peer.Response {
 
 	fmt.Println("initializing ledger")
 
@@ -32,12 +32,14 @@ func (contract *RepoContract) Init(stub shim.ChaincodeStubInterface) peer.Respon
 }
 
 
-func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+func (contract * RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	function, args := stub.GetFunctionAndParameters()
 
 	if function == "addNewRepo" {
 		return contract.addNewRepo(stub, args)
+	}	else if function == "getRepo" {
+		return contract.getRepo(stub, args)
 	}
 	//  else if function == "addNewBranch" {
 	// 	return contract.addNewBranch(stub, args)
@@ -46,6 +48,7 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 	// } else if function == "addCollabrator" {
 	// 	return contract.addCollabrator(stub, args)
 	// }
+
 
 	// else if function == "queryRepo" {
 	// 	return contract.queryRepo(stub, args)
@@ -59,15 +62,14 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 	// 	return contract.queryCollabrators(stub, args)
 	// }
 
-
 	return shim.Error("Invalid Smart Contract function name.")
 }
 
 
 
 
-func (contract *RepoContract) getCurrentRepoState(stub shim.ChaincodeStubInterface) (datastructures.Repo, int) {
-	repo, _ := datastructures.CreateNewRepo("", 0, nil)
+func (contract * RepoContract) getCurrentRepoState(stub shim.ChaincodeStubInterface) (datastructures.Repo, int) {
+	repo, _ := datastructures.CreateNewRepo("","", 0, nil)
 	master, _ := datastructures.CreateNewRepoBranch("master", "client", 0, nil)
 	repo.AddBranch(master)
 	pushes := contract.getAllPushes(stub)
@@ -85,14 +87,14 @@ func (contract *RepoContract) getCurrentRepoState(stub shim.ChaincodeStubInterfa
 
 
 
-//pushAsBytes, _ := json.Marshal(args[1])
-//stub.PutState(args[0], pushAsBytes)
+// pushAsBytes, _ := json.Marshal(args[1])
+// stub.PutState(args[0], pushAsBytes)
 
 // carAsBytes, _ := stub.GetState(args[0])
 // return shim.Success(carAsBytes)
 
 //need to generate hash as key instead of just the same object
-func (contract *RepoContract) addPush(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (contract * RepoContract) addPush(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
@@ -121,7 +123,7 @@ func (contract *RepoContract) addPush(stub shim.ChaincodeStubInterface, args []s
 	return shim.Error("Invalid push Log!")
 }
 
-func (contract *RepoContract) addBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (contract * RepoContract) addBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
@@ -148,7 +150,7 @@ func (contract *RepoContract) addBranch(stub shim.ChaincodeStubInterface, args [
 // 	return shim.Success(nil)
 // }
 
-func (contract *RepoContract) getAllPushes(stub shim.ChaincodeStubInterface) []datastructures.PushLog {
+func (contract * RepoContract) getAllPushes(stub shim.ChaincodeStubInterface) []datastructures.PushLog {
 
 	startKeyBytes, _ := json.Marshal(0)
 	endKeyBytes, _ := stub.GetState("PushNumber")
@@ -176,7 +178,7 @@ func (contract *RepoContract) getAllPushes(stub shim.ChaincodeStubInterface) []d
 	return pushlogs
 }
 
-func (contract *RepoContract) getPushes(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (contract * RepoContract) getPushes(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 
 	fmt.Println("Querying the ledger..")
 
@@ -216,7 +218,7 @@ func (contract *RepoContract) getPushes(stub shim.ChaincodeStubInterface, args [
 	return shim.Success(pushlogsjson)
 }
 
-func (contract *RepoContract) getBranches(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (contract * RepoContract) getBranches(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	fmt.Println("Querying the ledger..")
 	repo, _ := contract.getCurrentRepoState(stub)
 
