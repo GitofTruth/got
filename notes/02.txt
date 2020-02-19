@@ -1,15 +1,10 @@
 Repo
 	repoID
-	******	
+	******
 	repoName
 	author
 	timestamp
-	
-RepoHashes
-	repoID	
-	hash
-	******
-
+	[]CommitHashes
 
 Branch
 	repoID
@@ -17,7 +12,7 @@ Branch
 	******
 	author
 	timeStamp
-	
+
 BranchCommits
 	repoID
 	branchName
@@ -27,24 +22,5 @@ BranchCommits
 	author
 	committer
 	committerTimestamp
-	
-	
-CommitParenthashes
-	repoID
-	branchName
-	hash
-	parentHash
-	******
-	
-
-
-
-
-########################
-CommitSignatureByte
-	repoID
-	branchName
-	hash
-	******
-	SignatureByte
-	
+	[]CommitParenthashes
+	[]signature
