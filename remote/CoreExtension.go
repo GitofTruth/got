@@ -79,8 +79,6 @@ func GenerateRepoBranchCommitDBPair(author string, repoName string, branchName s
 
 func GenerateRepoBranchesCommitsDBPair(repo datastructures.Repo) ([]LedgerPair, error) {
 
-	repoHash := GetRepoKey(repo.Author, repo.Name)
-
 	list := make([]LedgerPair, 0)
 	for _, branch := range repo.Branches {
 		for _, log := range branch.Logs {
