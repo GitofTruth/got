@@ -9,6 +9,11 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 )
 
+func applyPair(stub shim.ChaincodeStubInterface, pair LedgerPair) bool {
+	stub.PutState(pair.key, pair.value)
+	return true
+}
+
 func applyPairs(stub shim.ChaincodeStubInterface, pairs []LedgerPair) bool {
 	for _, pair := range pairs {
 		stub.PutState(pair.key, pair.value)
@@ -37,6 +42,55 @@ func (contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface, args 
 
 	branchCommitPairs, _ := GenerateRepoBranchesCommitsDBPair(repo)
 	applyPairs(stub, branchCommitPairs)
+
+	return shim.Success(nil)
+}
+
+func (contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoName, repoAuthor, branchBinary
+
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3")
+	}
+
+	fmt.Println("trying to process:\t", args)
+
+	// TODO: needs read branches & commits
+	// generate Repo & check validation
+
+	repoBranch, err := datastructures.UnmarashalRepoBranch(args[2])
+	if err != nil {
+		return shim.Error("RepoBranch is invalid!")
+	}
+
+	branchPair, _ := GenerateRepoBranchDBPair(args[0], args[1], repoBranch)
+	applyPair(stub, branchPair)
+
+	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingBranch(args[0], args[1], repoBranch)
+	applyPairs(stub, commitsPairs)
+
+	return shim.Success(nil)
+}
+
+func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoName, repoAuthor, PushLogBinary
+
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3")
+	}
+
+	fmt.Println("trying to process:\t", args)
+
+	// TODO: needs read branches & commits
+	// generate Repo & check validation
+
+	pushLog, err := datastructures.UnmarashalPushLog(args[2])
+	if err != nil {
+		return shim.Error("PushLog is invalid!")
+	}
+
+	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(args[0], args[1], pushLog)
+	applyPairs(stub, commitsPairs)
 
 	return shim.Success(nil)
 }

@@ -9,6 +9,8 @@ import (
 )
 
 func (contract *RepoContract) getRepo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName
+
 	fmt.Println("Querying the ledger..")
 
 	if len(args) != 2 {

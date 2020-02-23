@@ -1,5 +1,7 @@
 package datastructures
 
+import "encoding/json"
+
 type RepoBranch struct {
 	Name      string               `json:"branchName"`
 	Author    string               `json:"author"`
@@ -7,7 +9,7 @@ type RepoBranch struct {
 	Logs      map[string]CommitLog `json:"logs"`
 }
 
-func CreateNewRepoBranch(name string, author string, timestamp int, logs map[string] CommitLog) (RepoBranch, error) {
+func CreateNewRepoBranch(name string, author string, timestamp int, logs map[string]CommitLog) (RepoBranch, error) {
 	var repoBranch RepoBranch
 	repoBranch.Name = name
 	repoBranch.Author = author
@@ -18,6 +20,17 @@ func CreateNewRepoBranch(name string, author string, timestamp int, logs map[str
 	} else {
 		repoBranch.Logs = logs
 	}
+
+	return repoBranch, nil
+}
+
+func UnmarashalRepoBranch(objectString string) (RepoBranch, error) {
+	var repoBranch RepoBranch
+
+	json.Unmarshal([]byte(objectString), &repoBranch)
+
+	// validate a branch
+	// ??
 
 	return repoBranch, nil
 }
