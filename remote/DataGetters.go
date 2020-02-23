@@ -95,16 +95,8 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s)
 			branch.AddCommitLog(commit)
 		}
-
 		repo.AddBranch(branch)
 	}
-
-	// buffer, err := constructQueryResponseFromIterator(resultsIterator)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// create repoInstance
 
 	return repo, nil
 }
@@ -131,6 +123,26 @@ func (contract *RepoContract) getRepo(stub shim.ChaincodeStubInterface, args []s
 	fmt.Println("Found this repo:", string(repoData))
 
 	return shim.Success(repoData)
+}
+
+func (contract *RepoContract) queryBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName
+
+	fmt.Println("Querying the ledger..")
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2.")
+	}
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	fmt.Println("Found these branches:", repo.GetBranches())
+
+	j, _ := json.Marshal(repo.GetBranches())
+	return shim.Success([]byte(string(j)))
 }
 
 // indexName := "index-Branch"
