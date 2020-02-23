@@ -107,6 +107,30 @@ func GenerateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo da
 	return list, nil
 }
 
+func GenerateRepoBranchesCommitsDBPairUsingBranch(author string, repoName string, repoBranch datastructures.RepoBranch) ([]LedgerPair, error) {
+
+	list := make([]LedgerPair, 0)
+
+	for _, log := range repoBranch.Logs {
+		pair, _ := GenerateRepoBranchCommitDBPair(author, repoName, repoBranch.Name, log)
+		list = append(list, pair)
+	}
+
+	return list, nil
+}
+
+func GenerateRepoBranchesCommitsDBPairUsingPushLog(author string, repoName string, pushLog datastructures.PushLog) ([]LedgerPair, error) {
+
+	list := make([]LedgerPair, 0)
+
+	for _, log := range pushLog.Logs {
+		pair, _ := GenerateRepoBranchCommitDBPair(author, repoName, pushLog.BranchName, log)
+		list = append(list, pair)
+	}
+
+	return list, nil
+}
+
 func GetRepoKey(author string, repoName string) string {
 
 	data := map[string]interface{}{"repoName": repoName, "author": author}
