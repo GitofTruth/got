@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-
 )
 
 type LedgerPair struct {
@@ -26,9 +25,8 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 	// key := map[string]interface{}{"repoID": repoHash}
 	// jsonKey, _ := json.Marshal(key)
-	
-	pair.key = string(repoHash)
 
+	pair.key = string(repoHash)
 
 	value := map[string]interface{}{"repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "timestamp": repo.Timestamp, "hashes": repo.CommitHashes}
 	pair.value, _ = json.Marshal(value)
@@ -48,10 +46,9 @@ func GenerateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, r
 	indexName := "index-Branch"
 	branchIndexKey, _ := stub.CreateCompositeKey(indexName, []string{repoHash, branch.Name})
 
-
 	// jsonKey, _ := json.Marshal(key)
 
-	fmt.Println("branchIndexKey : "+ branchIndexKey)
+	fmt.Println("branchIndexKey : " + branchIndexKey)
 	pair.key = string(branchIndexKey)
 
 	value := map[string]interface{}{"repoID": repoHash, "branchName": branch.Name, "author": branch.Author, "timeStamp": branch.Timestamp}
@@ -78,10 +75,8 @@ func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author str
 
 	var pair LedgerPair
 
-
 	indexName := "index-BranchCommits"
 	branchCommitIndexKey, _ := stub.CreateCompositeKey(indexName, []string{repoHash, branchName, commitLog.Hash})
-	
 
 	// key := map[string]interface{}{"repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash}
 	// jsonKey, _ := json.Marshal(key)
@@ -107,24 +102,24 @@ func GenerateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo da
 	return list, nil
 }
 
-func GenerateRepoBranchesCommitsDBPairUsingBranch(author string, repoName string, repoBranch datastructures.RepoBranch) ([]LedgerPair, error) {
+func GenerateRepoBranchesCommitsDBPairUsingBranch(stub shim.ChaincodeStubInterface, author string, repoName string, repoBranch datastructures.RepoBranch) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 
 	for _, log := range repoBranch.Logs {
-		pair, _ := GenerateRepoBranchCommitDBPair(author, repoName, repoBranch.Name, log)
+		pair, _ := GenerateRepoBranchCommitDBPair(stub, author, repoName, repoBranch.Name, log)
 		list = append(list, pair)
 	}
 
 	return list, nil
 }
 
-func GenerateRepoBranchesCommitsDBPairUsingPushLog(author string, repoName string, pushLog datastructures.PushLog) ([]LedgerPair, error) {
+func GenerateRepoBranchesCommitsDBPairUsingPushLog(stub shim.ChaincodeStubInterface, author string, repoName string, pushLog datastructures.PushLog) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 
 	for _, log := range pushLog.Logs {
-		pair, _ := GenerateRepoBranchCommitDBPair(author, repoName, pushLog.BranchName, log)
+		pair, _ := GenerateRepoBranchCommitDBPair(stub, author, repoName, pushLog.BranchName, log)
 		list = append(list, pair)
 	}
 

@@ -17,7 +17,7 @@ func applyPair(stub shim.ChaincodeStubInterface, pair LedgerPair) bool {
 func applyPairs(stub shim.ChaincodeStubInterface, pairs []LedgerPair) bool {
 	for _, pair := range pairs {
 
-		fmt.Println("Key: "+ string(pair.key))
+		fmt.Println("Key: " + string(pair.key))
 		fmt.Println("Value: " + string(pair.value))
 
 		stub.PutState(string(pair.key), pair.value)
@@ -67,10 +67,10 @@ func (contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, arg
 		return shim.Error("RepoBranch is invalid!")
 	}
 
-	branchPair, _ := GenerateRepoBranchDBPair(args[0], args[1], repoBranch)
+	branchPair, _ := GenerateRepoBranchDBPair(stub, args[0], args[1], repoBranch)
 	applyPair(stub, branchPair)
 
-	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingBranch(args[0], args[1], repoBranch)
+	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingBranch(stub, args[0], args[1], repoBranch)
 	applyPairs(stub, commitsPairs)
 
 	return shim.Success(nil)
@@ -93,7 +93,7 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("PushLog is invalid!")
 	}
 
-	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(args[0], args[1], pushLog)
+	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(stub, args[0], args[1], pushLog)
 	applyPairs(stub, commitsPairs)
 
 	return shim.Success(nil)
