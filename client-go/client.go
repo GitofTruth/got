@@ -70,7 +70,7 @@ func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (st
 
 func (cli *Client) CreateAddNewRepoMessage() string {
 
-	x, _ := datastructures.CreateNewRepo("GoT", "mickey", 0, nil)
+	x, _ := datastructures.CreateNewRepo("GoT", "hassan", 0, nil)
 	branch, _ := datastructures.CreateNewRepoBranch("master", "masterCreator", 1, nil)
 	x.AddBranch(branch)
 	str, _ := json.Marshal(x)

@@ -11,7 +11,11 @@ import (
 
 func applyPairs(stub shim.ChaincodeStubInterface, pairs []LedgerPair) bool {
 	for _, pair := range pairs {
-		stub.PutState(pair.key, pair.value)
+
+		fmt.Println("Key: "+ string(pair.key))
+		fmt.Println("Value: " + string(pair.value))
+
+		stub.PutState(string(pair.key), pair.value)
 	}
 	return true
 }
@@ -29,13 +33,13 @@ func (contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("Repo is invalid!")
 	}
 
-	repoPairs, _ := GenerateRepoDBPair(repo)
+	repoPairs, _ := GenerateRepoDBPair(stub, repo)
 	applyPairs(stub, repoPairs)
 
-	branchPairs, _ := GenerateRepoBranchesDBPair(repo)
+	branchPairs, _ := GenerateRepoBranchesDBPair(stub, repo)
 	applyPairs(stub, branchPairs)
 
-	branchCommitPairs, _ := GenerateRepoBranchesCommitsDBPair(repo)
+	branchCommitPairs, _ := GenerateRepoBranchesCommitsDBPair(stub, repo)
 	applyPairs(stub, branchCommitPairs)
 
 	return shim.Success(nil)
