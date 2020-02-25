@@ -41,38 +41,51 @@ function GetObjectsName(objHomeDirectory) {
   return names;
 }
 
-function CopyObjects(namesList = [],pulling = true, storagePath = defStoragePath){
-  let localObjsPath = "objects/"
+function CopyObjects(namesList = [],pulling = true, sourcePath = defStoragePath){
+  let destinationPath = "objects/"
   if (!pulling){
-    let temp = storagePath
-    storagePath = localObjsPath
-    localObjsPath = temp
+    let temp = sourcePath
+    sourcePath = destinationPath
+    destinationPath = temp
+    fs.copyFileSync(sourcePath + "../refs/heads/master" , destinationPath + "../master")
+  }else {
+    fs.copyFileSync(sourcePath + "../master", destinationPath + "../refs/heads/master")
   }
 
-  console.log(storagePath)
-  console.log(localObjsPath)
-  let localObjs = GetObjectsName(storagePath)
+  console.log("Starting copying files ... to storage")
+  console.log("The source Path: " + sourcePath)
+  console.log("The destination Path: " + destinationPath)
+  let sourceObjs = GetObjectsName(sourcePath)
+  let destinationObjs = GetObjectsName(destinationPath)
   let missing = []
+
+  if (namesList.length <= 0){
+    namesList = sourceObjs
+  }
 
   if (namesList.length > 0){
     namesList.forEach(n => {
-      if(localObjs.indexOf(n) <= -1){
+      if(destinationObjs.indexOf(n) == -1){
         missing = [...missing, n]
       }
     })
-  }{
-    missing = localObjs
+  }else{
+    missing = namesList
   }
 
-  console.log(localObjs)
+  console.log("Found source Objects: ")
+  console.log(sourceObjs)
+  console.log("Found destination objects Objects: ")
+  console.log(destinationObjs)
+  console.log("Missing destination Objects: ")
   console.log(missing)
 
   missing.forEach( m => {
-    if (!fs.existsSync(localObjsPath + m.substring(0,2))){
-      fs.mkdirSync(localObjsPath + m.substring(0,2));
+    if (!fs.existsSync(destinationPath + m.substring(0,2))){
+      fs.mkdirSync(destinationPath + m.substring(0,2));
     }
-    if(!fs.existsSync(localObjsPath + m.substring(0,2) + "/" + m.substring(2))){
-      fs.copyFileSync(storagePath + m.substring(0,2) + "/" + m.substring(2), localObjsPath + m.substring(0,2) + "/" + m.substring(2)
+    if(!fs.existsSync(destinationPath + m.substring(0,2) + "/" + m.substring(2))){
+      fs.copyFileSync(sourcePath + m.substring(0,2) + "/" + m.substring(2), destinationPath + m.substring(0,2) + "/" + m.substring(2)
       // , (err) => {
       // if (err) throw err;
       // console.log(m + " was added to bare repo");
@@ -80,6 +93,7 @@ function CopyObjects(namesList = [],pulling = true, storagePath = defStoragePath
     );
     }
   })
+  console.log("Done copying files ... to storage\n\n")
 }
 
 CopyObjects([], false)
