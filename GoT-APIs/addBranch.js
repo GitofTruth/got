@@ -35,6 +35,7 @@ const options =
   [ 'subject'
   , 'authorName'
   , 'committerName'
+  , 'authorDate'
   , 'hash'
   , 'parentHashes'
   ]
@@ -90,7 +91,7 @@ async function main() {
             Message : commits[i].subject,
             Author : commits[i].authorName,
             Committer  : commits[i].committerName,
-            Timestamp  : 4, 
+            Timestamp  : toTimestamp(commits[i].authorDate), 
             Hash      : commits[i].hash,
             Parenthashes : [commits[i].parentHashes],
             Signature   : null
