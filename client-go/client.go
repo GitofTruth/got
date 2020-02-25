@@ -73,6 +73,8 @@ func (cli *Client) CreateAddNewRepoMessage() string {
 	x, _ := datastructures.CreateNewRepo("GoT", "hassan", 0, nil)
 	branch, _ := datastructures.CreateNewRepoBranch("master", "masterCreator", 1, nil)
 	x.AddBranch(branch)
+	commit, _ := datastructures.CreateNewCommitLog("message", "mickey", "mickeyAsCommiter", 3, "*************", nil, nil)
+	x.AddCommitLog(commit, "master")
 	str, _ := json.Marshal(x)
 
 	argsStr, _ := json.Marshal(common.CreateNewArgsList("addNewRepo", string(str)))
