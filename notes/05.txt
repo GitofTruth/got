@@ -1,0 +1,16 @@
+cd ../../../../..
+sudo vagrant up
+sudo vargant ssh
+
+
+. set-env.sh acme
+cd gocc/src/github.com/GitofTruth/GoT/
+go run main.go
+
+
+chain.sh install
+chain.sh instantiate
+
+
+#set-chain-env.sh -i 
+#set-chain-env.sh -q

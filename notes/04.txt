@@ -1,0 +1,8 @@
+cd ../../../../..
+sudo vagrant up
+sudo vargant ssh
+
+dev-init.sh -d -s -e
+. set-env.sh acme
+set-chain-env.sh -n GoT -p github.com/GitofTruth/GoT/remote -v 1.0
+cc-run.sh
