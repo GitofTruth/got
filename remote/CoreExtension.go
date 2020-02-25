@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/GitofTruth/GoT/datastructures"
 
+	b64 "encoding/base64"
 	"fmt"
 
 	"crypto/sha256"
@@ -28,7 +29,7 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 	pair.key = string(repoHash)
 
-	value := map[string]interface{}{"repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "timestamp": repo.Timestamp, "hashes": repo.CommitHashes}
+	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "timestamp": string(repo.Timestamp)}
 	pair.value, _ = json.Marshal(value)
 
 	list = append(list, pair)
@@ -51,7 +52,7 @@ func GenerateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, r
 	fmt.Println("branchIndexKey : " + branchIndexKey)
 	pair.key = string(branchIndexKey)
 
-	value := map[string]interface{}{"repoID": repoHash, "branchName": branch.Name, "author": branch.Author, "timeStamp": branch.Timestamp}
+	value := map[string]interface{}{"docName": "branch", "repoID": repoHash, "branchName": branch.Name, "author": branch.Author, "timeStamp": string(branch.Timestamp)}
 	pair.value, _ = json.Marshal(value)
 
 	return pair, nil
@@ -82,7 +83,7 @@ func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author str
 	// jsonKey, _ := json.Marshal(key)
 	pair.key = string(branchCommitIndexKey)
 
-	value := map[string]interface{}{"repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": commitLog.CommitterTimestamp, "parenthashes": commitLog.Parenthashes, "signature": commitLog.Signature}
+	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": string(commitLog.CommitterTimestamp), "parenthashes": commitLog.Parenthashes, "signature": commitLog.Signature}
 	pair.value, _ = json.Marshal(value)
 
 	return pair, nil
@@ -134,9 +135,15 @@ func GetRepoKey(author string, repoName string) string {
 	repoHash := sha256.New()
 	repoHash.Write(js)
 
-	fmt.Println("Repo Hash: " + string(repoHash.Sum(nil)))
+	fmt.Println("Repo Hash: ", repoHash.Sum(nil))
+	sEnc := b64.StdEncoding.EncodeToString([]byte(repoHash.Sum(nil)))
+	fmt.Println("Repo Hash: ", sEnc)
 
-	keyBytes, _ := json.Marshal(string(repoHash.Sum(nil)))
+	// fmt.Println("Repo String Hash: " + string(repoHash.Sum(nil)))
+	//
+	// keyBytes, _ := json.Marshal(string(repoHash.Sum(nil)))
+	// fmt.Println("Repo String Hash keyBytes: ", keyBytes)
+	// fmt.Println("Repo String Hash keyBytes String: " + string(keyBytes))
 
-	return string(keyBytes)
+	return sEnc
 }

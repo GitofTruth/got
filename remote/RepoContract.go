@@ -42,10 +42,11 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 		return contract.addNewBranch(stub, args)
 	} else if function == "addCommits" {
 		return contract.addCommits(stub, args)
+	} else if function == "queryBranches" {
+		return contract.queryBranches(stub, args)
 	} else if function == "queryBranch" {
 		return contract.queryBranch(stub, args)
 	}
-
 	//  else if function == "addCollabrator" {
 	// 	return contract.addCollabrator(stub, args)
 	// }
