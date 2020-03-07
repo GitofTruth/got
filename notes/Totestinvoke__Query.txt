@@ -12,5 +12,5 @@ chain.sh install
 chain.sh instantiate
 
 
-#set-chain-env.sh -i 
+#set-chain-env.sh -i
 #set-chain-env.sh -q
