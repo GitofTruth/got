@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/GitofTruth/GoT/datastructures"
 
+	"strconv"
+
 	b64 "encoding/base64"
 	"fmt"
 
@@ -29,7 +31,7 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 	pair.key = string(repoHash)
 
-	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "timestamp": string(repo.Timestamp)}
+	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "timeStamp": strconv.Itoa(repo.Timestamp)}
 	pair.value, _ = json.Marshal(value)
 
 	list = append(list, pair)
@@ -52,7 +54,7 @@ func GenerateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, r
 	fmt.Println("branchIndexKey : " + branchIndexKey)
 	pair.key = string(branchIndexKey)
 
-	value := map[string]interface{}{"docName": "branch", "repoID": repoHash, "branchName": branch.Name, "author": branch.Author, "timeStamp": string(branch.Timestamp)}
+	value := map[string]interface{}{"docName": "branch", "repoID": repoHash, "branchName": branch.Name, "author": branch.Author, "timeStamp": strconv.Itoa(branch.Timestamp)}
 	pair.value, _ = json.Marshal(value)
 
 	return pair, nil
@@ -83,7 +85,7 @@ func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author str
 	// jsonKey, _ := json.Marshal(key)
 	pair.key = string(branchCommitIndexKey)
 
-	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": string(commitLog.CommitterTimestamp), "parenthashes": commitLog.Parenthashes, "signature": commitLog.Signature}
+	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": strconv.Itoa(commitLog.CommitterTimestamp), "parentHashes": commitLog.Parenthashes, "signature": commitLog.Signature}
 	pair.value, _ = json.Marshal(value)
 
 	return pair, nil

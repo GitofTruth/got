@@ -40,7 +40,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 		fmt.Println("Could not unmarashal requested repo: ", err)
 		return repo, errors.New("Could not unmarashal requested repo")
 	}
-	timestamp, _ := strconv.Atoi(structuredRepoData["timestamp"])
+	timestamp, _ := strconv.Atoi(structuredRepoData["timeStamp"])
 	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], timestamp, nil)
 
 	// getting the repo branches
@@ -69,7 +69,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			fmt.Println("Could not unmarashal requested Branch: ", err)
 			return repo, errors.New("Could not unmarashal requested Branch")
 		}
-		branchTimestamp, _ := strconv.Atoi(structuredBranchData["timestamp"])
+		branchTimestamp, _ := strconv.Atoi(structuredBranchData["timeStamp"])
 		branch, _ := datastructures.CreateNewRepoBranch(structuredBranchData["branchName"], structuredBranchData["author"], branchTimestamp, nil)
 		repo.AddBranch(branch)
 
@@ -101,7 +101,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			}
 			committerTimestamp, _ := strconv.Atoi(structuredCommitData["committerTimestamp"])
 			var ph []string
-			_ = json.Unmarshal([]byte(structuredCommitData["parenthashes"]), &ph)
+			_ = json.Unmarshal([]byte(structuredCommitData["parentHashes"]), &ph)
 			var s []byte
 			_ = json.Unmarshal([]byte(structuredCommitData["signature"]), &s)
 			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s)
@@ -113,7 +113,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 	return repo, nil
 }
 
-func (contract *RepoContract) getRepo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (contract *RepoContract) queryRepo(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	// repoAuthor, repoName
 
 	fmt.Println("Querying the ledger .. getRepo", args)
@@ -135,6 +135,26 @@ func (contract *RepoContract) getRepo(stub shim.ChaincodeStubInterface, args []s
 	fmt.Println("Found this repo:", string(repoData))
 
 	return shim.Success(repoData)
+}
+
+func (contract *RepoContract) clone(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName
+
+	fmt.Println("Querying the ledger .. clone", args)
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2.")
+	}
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	fmt.Println("Found this repo:", repo)
+
+	j, _ := json.Marshal(repo)
+	return shim.Success([]byte(string(j)))
 }
 
 func (contract *RepoContract) queryBranches(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -181,6 +201,82 @@ func (contract *RepoContract) queryBranch(stub shim.ChaincodeStubInterface, args
 
 	seralized, _ := json.Marshal(branch)
 	return shim.Success([]byte(string(seralized)))
+}
+
+func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName, branchName, lastcommit
+
+	fmt.Println("Querying the ledger .. queryBranchCommits", args)
+
+	if len(args) != 4 {
+		return shim.Error("Incorrect number of arguments. Expecting 4.")
+	}
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	if !repo.IsBranch(args[2]) {
+		fmt.Println("Requested Branch Not found")
+		return shim.Error("Requested Branch Not found")
+	}
+
+	branch := repo.Branches[args[2]]
+	fmt.Println("Found this branch:", branch)
+
+	commits := make([]datastructures.CommitLog, 0)
+	//last commit exist?
+	if !repo.IsCommitHash(args[3]) {
+		fmt.Println("Requested BranchCommit Not found")
+		return shim.Error("Requested BranchCommit Not found")
+	}
+	//last commit time
+	t := branch.Logs[args[3]].CommitterTimestamp
+	// get all commits after this time
+	for _, log := range branch.Logs {
+		if log.CommitterTimestamp >= t {
+			commits = append(commits, log)
+		}
+	}
+
+	seralized, _ := json.Marshal(commits)
+	return shim.Success([]byte(string(seralized)))
+}
+
+func (contract *RepoContract) queryLastBranchCommit(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName, branchName
+
+	fmt.Println("Querying the ledger .. queryBranchCommits", args)
+
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3.")
+	}
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	if !repo.IsBranch(args[2]) {
+		fmt.Println("Requested Branch Not found")
+		return shim.Error("Requested Branch Not found")
+	}
+
+	branch := repo.Branches[args[2]]
+	fmt.Println("Found this branch:", branch)
+
+	t := 0
+	hash := ""
+	// get all commits after this time
+	for _, log := range branch.Logs {
+		if log.CommitterTimestamp >= t {
+			t = log.CommitterTimestamp
+			hash = log.Hash
+		}
+	}
+
+	return shim.Success([]byte(hash))
 }
 
 // indexName := "index-Branch"
