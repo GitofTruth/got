@@ -5,7 +5,7 @@ import "encoding/json"
 type RepoBranch struct {
 	Name      string               `json:"branchName"`
 	Author    string               `json:"author"`
-	Timestamp int                  `json:"timestamp"`
+	Timestamp int                  `json:"timeStamp"`
 	Logs      map[string]CommitLog `json:"logs"`
 }
 

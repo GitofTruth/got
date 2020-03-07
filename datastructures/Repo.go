@@ -8,7 +8,7 @@ import (
 type Repo struct {
 	Name         string                `json:"repoName"`
 	Author       string                `json:"author"`
-	Timestamp    int                   `json:"timestamp"`
+	Timestamp    int                   `json:"timeStamp"`
 	CommitHashes map[string]struct{}   `json:"hashes"`
 	Branches     map[string]RepoBranch `json:"branches"`
 }
