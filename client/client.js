@@ -11,6 +11,12 @@ const repoPath = '.';
 var repo = {};
 var branchesNames = [];
 var branchesContent = [];
+var gateway, network, contract;
+
+let testpath = ".git/objects/"
+let defStoragePath = "../../Storage/"
+let excptList = ["info", "pack"]
+
 
 
 var options =
@@ -42,8 +48,10 @@ const gitlog = require('gitlog');
 
 const simpleGit = require('simple-git')(repoPath);
 
+const { join } = require("path")
 
-var gateway, network, contract;
+
+
 
 class Client {
   constructor (){
@@ -155,6 +163,7 @@ class Client {
     }
   }
 
+  // stepTwo
   async addCommits(){
 
   }
@@ -172,28 +181,54 @@ class Client {
     try{
         let response = await contract.evaluateTransaction('queryLastBranchCommit', repo['author'], repo['repoName'], branchName)
         console.log("Submit Response=",response.toString())
+        return response.toString()
     } catch(e){
         console.log(e)
     }
   }
-  //
-  // async function submitTxnContract(contract, pushlog){
-  //     try{
-  //         let response = await this.contract.submitTransaction('addNewBranch', "Hassan", "testRepo", pushlog)
-  //         console.log("Submit Response=",response.toString())
-  //     } catch(e){
-  //         console.log(e)
-  //     }
-  // }
-  //
-  // async function queryContract(contract){
-  //     try{
-  //         let response = await this.contract.evaluateTransaction('queryBranch', 'Hassan', 'testRepo', 'master')
-  //         console.log(`Query Response=${response.toString()}`)
-  //     } catch(e){
-  //         console.log(e)
-  //     }
-  // }
+
+  // to be set generic >>> stepOne
+  getCurrentBranchName(){
+    return "master"
+  }
+
+  updateStorage(pulling){
+    CopyObjects([], pulling)
+  }
+
+  async updateRemote(){
+    // copy files from nodeStorage to remote (.got) >> updateStorage()
+    updateStorage(true);
+
+    // update head in remote (.got) >> queryLastBranchCommit() & write to head file in (.got)
+    let lastCommit = this.queryLastBranchCommit(this.getCurrentBranchName());
+    fileName = '.got/refs/heads/' + this.getCurrentBranchName();
+    file = fopen(fileName, 3)
+    fwrite(file, lastCommit)
+  }
+
+  //stepThree
+  async remotePostReceive(){
+    // sending objects in remote to nodeStorage
+    updateStorage(false)
+
+    // for current branch:
+      // get last Commit in hyperledger
+      // get last Commit in Remote
+
+      // find commits in between >>> needs change in contract
+      // send commits in between to hyperledger
+  }
+
+  async localPrePush(){
+    await updateRemote()
+  }
+
+  // StepFour
+  // when ???????
+  async pull(){
+    await updateRemote()
+  }
 }
 
 async function setupGateway(){
@@ -213,6 +248,87 @@ async function setupGateway(){
   await gateway.connect(connectionProfile, connectionOptions);
 }
 
+function ListFiles(testFolder){
+  let files = []
+  fs.readdirSync(testFolder).forEach(file => {
+    if( excptList.indexOf(file) > -1){
+    }else {
+      files = [... files, file]
+      // console.log(file);
+    }
+  });
+
+  return files
+}
+
+
+function GetObjectsName(objHomeDirectory) {
+  let names = []
+  let dirs = ListFiles(objHomeDirectory)
+  dirs.forEach(d => {
+    files = ListFiles(objHomeDirectory + d + "/")
+    files.forEach(f => {
+      names = [...names, d + f]
+    })
+  })
+
+  return names;
+}
+
+function CopyObjects(namesList = [],pulling = true, sourcePath = defStoragePath){
+  let destinationPath = "objects/"
+  if (!pulling){
+    let temp = sourcePath
+    sourcePath = destinationPath
+    destinationPath = temp
+    fs.copyFileSync(sourcePath + "../refs/heads/master" , destinationPath + "../master")
+  }else {
+    fs.copyFileSync(sourcePath + "../master", destinationPath + "../refs/heads/master")
+  }
+
+  console.log("Starting copying files ... to storage")
+  console.log("The source Path: " + sourcePath)
+  console.log("The destination Path: " + destinationPath)
+  let sourceObjs = GetObjectsName(sourcePath)
+  let destinationObjs = GetObjectsName(destinationPath)
+  let missing = []
+
+  if (namesList.length <= 0){
+    namesList = sourceObjs
+  }
+
+  if (namesList.length > 0){
+    namesList.forEach(n => {
+      if(destinationObjs.indexOf(n) == -1){
+        missing = [...missing, n]
+      }
+    })
+  }else{
+    missing = namesList
+  }
+
+  console.log("Found source Objects: ")
+  console.log(sourceObjs)
+  console.log("Found destination objects Objects: ")
+  console.log(destinationObjs)
+  console.log("Missing destination Objects: ")
+  console.log(missing)
+
+  missing.forEach( m => {
+    if (!fs.existsSync(destinationPath + m.substring(0,2))){
+      fs.mkdirSync(destinationPath + m.substring(0,2));
+    }
+    if(!fs.existsSync(destinationPath + m.substring(0,2) + "/" + m.substring(2))){
+      fs.copyFileSync(sourcePath + m.substring(0,2) + "/" + m.substring(2), destinationPath + m.substring(0,2) + "/" + m.substring(2)
+      // , (err) => {
+      // if (err) throw err;
+      // console.log(m + " was added to bare repo");
+      // }
+    );
+    }
+  })
+  console.log("Done copying files ... to storage\n\n")
+}
 
 function toTimestamp(strDate){
     var datum = Date.parse(strDate);
