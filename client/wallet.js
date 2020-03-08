@@ -1,6 +1,6 @@
 /**
  * Demostrates the use of wallet API
- * 
+ *
  * Utility for managing the wallet for users.
  */
 
@@ -11,11 +11,13 @@ const path = require('path');
 const { FileSystemWallet, X509WalletMixin } = require('fabric-network');
 
 // Location of the crypto for the dev environment
-const CRYPTO_CONFIG = path.resolve(__dirname, '../../../../../../network/crypto/crypto-config');
+// const CRYPTO_CONFIG = path.resolve(__dirname, '../../../../../../network/crypto/crypto-config');
+const CRYPTO_CONFIG = '/home/admin/projects/HLF-Dev-Chaincode-V1.4-1.3/network/crypto/crypto-config'
+
 const CRYPTO_CONFIG_PEER_ORGS = path.join(CRYPTO_CONFIG, 'peerOrganizations')
 
 // Folder for creating the wallet - All identities written under this
-const WALLET_FOLDER = './user-wallet'
+const WALLET_FOLDER = '.gotconfig/user-wallet'
 
 // Create an instance of the file system wallet
 const wallet = new FileSystemWallet(WALLET_FOLDER);
@@ -41,7 +43,7 @@ if(action == 'list'){
     } else {
         exportIdentity(process.argv[3], process.argv[4])
     }
-} 
+}
 
 /**
  * @param   string  Organization = acme or budget
@@ -68,7 +70,7 @@ async function addToWallet(org, user) {
     // Create the label
     const identityLabel = createIdentityLabel(org,user);
 
-    // Create the X509 identity 
+    // Create the X509 identity
     const identity = X509WalletMixin.createIdentity(mspId, cert, key);
 
     // Add to the wallet
@@ -83,18 +85,18 @@ async function listIdentities(){
 
     // Retrieve the identities in folder
     let list = await wallet.list()
- 
+
     // Loop through the list & print label
     for(var i=0; i < list.length; i++) {
          console.log((i+1)+'. '+list[i].label)
     }
- 
+
  }
 
  /**
  * Extracts the identity from the wallet
- * @param {string} org 
- * @param {string} user 
+ * @param {string} org
+ * @param {string} user
  */
 async function exportIdentity(org, user) {
     // Label is used for identifying the identity in wallet
@@ -114,8 +116,8 @@ async function exportIdentity(org, user) {
 
 /**
  * Reads content of the certificate
- * @param {string} org 
- * @param {string} user 
+ * @param {string} org
+ * @param {string} user
  */
 function readCertCryptogen(org, user) {
     //budget.com/users/Admin@budget.com/msp/signcerts/Admin@budget.com-cert.pem"
@@ -126,8 +128,8 @@ function readCertCryptogen(org, user) {
 
 /**
  * Reads the content of users private key
- * @param {string} org 
- * @param {string} user 
+ * @param {string} org
+ * @param {string} user
  */
 function readPrivateKeyCryptogen(org, user) {
     // ../crypto/crypto-config/peerOrganizations/budget.com/users/Admin@budget.com/msp/keystore/05beac9849f610ad5cc8997e5f45343ca918de78398988def3f288b60d8ee27c_sk
@@ -145,7 +147,7 @@ function readPrivateKeyCryptogen(org, user) {
 /**
  * Utility function
  * Creates the MSP ID from the org name for 'acme' it will be 'AcmeMSP'
- * @param {string} org 
+ * @param {string} org
  */
 function createMSPId(org) {
     return org.charAt(0).toUpperCase() + org.slice(1) + 'MSP'
@@ -154,8 +156,8 @@ function createMSPId(org) {
 /**
  * Utility function
  * Creates an identity label for the wallet
- * @param {string} org 
- * @param {string} user 
+ * @param {string} org
+ * @param {string} user
  */
 function createIdentityLabel(org, user){
     return user+'@'+org+'.com';

@@ -1,6 +1,6 @@
 cd ../../../../..
 sudo vagrant up
-sudo vargant ssh
+sudo vagrant ssh
 
 
 . set-env.sh acme
