@@ -103,7 +103,8 @@ class client {
 
   addRepo(){
     try{
-        let response = await this.contract.submitTransaction('addNewRepo', "Hassan", "testRepo", pushlog)
+        let newRepoString = JSON.stringify(repo);
+        let response = await this.contract.submitTransaction('addNewRepo', newRepoString)
         console.log("Submit Response=",response.toString())
     } catch(e){
         console.log(e)
@@ -111,35 +112,71 @@ class client {
   }
 
   queryRepo(){
-
+    try{
+        let response = await this.contract.evaluateTransaction('queryRepo', repo['author'], repo['repoName'])
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
   cloneRepo(){
-
+    try{
+        let response = await this.contract.evaluateTransaction('clone', repo['author'], repo['repoName'])
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
-  addBranch(){
-
+  addBranch(branchName){
+    try{
+        let newBranchString = JSON.stringify(repo['branches'][branchName]);
+        let response = await this.contract.submitTransaction('addNewBranch', repo['author'], repo['repoName'], newBranchString)
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
   queryBranches(){
-
+    try{
+        let response = await this.contract.evaluateTransaction('queryBranches', repo['author'], repo['repoName'])
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
-  queryBranch(){
-
+  queryBranch(branchName){
+    try{
+        let response = await this.contract.evaluateTransaction('queryBranch', repo['author'], repo['repoName'], branchName)
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
   addCommits(){
-
+    
   }
 
-  queryBranchCommits(){
-
+  queryBranchCommits(branchName, lastCommit){
+    try{
+        let response = await this.contract.evaluateTransaction('queryBranchCommits', repo['author'], repo['repoName'], branchName, lastCommit)
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
-  queryLastBranchCommit(){
-
+  queryLastBranchCommit(branchName){
+    try{
+        let response = await this.contract.evaluateTransaction('queryLastBranchCommit', repo['author'], repo['repoName'], branchName)
+        console.log("Submit Response=",response.toString())
+    } catch(e){
+        console.log(e)
+    }
   }
 
   async static setupGateway(){

@@ -51,7 +51,7 @@ func (contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface, args 
 }
 
 func (contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	// repoName, repoAuthor, branchBinary
+	// repoAuthor, repoName, branchBinary
 
 	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 3")
