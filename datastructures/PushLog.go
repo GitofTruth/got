@@ -3,8 +3,8 @@ package datastructures
 import "encoding/json"
 
 type PushLog struct {
-	BranchName string
-	Logs       []CommitLog
+	BranchName string      `json:"branchName"`
+	Logs       []CommitLog `json:"logs"`
 }
 
 func CreateNewPushLog(branchname string, logs []CommitLog) (PushLog, error) {
