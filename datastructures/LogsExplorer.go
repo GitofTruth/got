@@ -85,7 +85,7 @@ func (le *LogsExplorer) GetInternalRepo() (Repo, error) {
 	branches := make(map[string]RepoBranch)
 	branches[branch.Name] = branch
 
-	return CreateNewRepo(auth,"", time, branches)
+	return CreateNewRepo(auth,"", "DirectoryCID", time, branches)
 }
 
 //get repo general info
