@@ -69,7 +69,7 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 }
 
 func (contract *RepoContract) getCurrentRepoState(stub shim.ChaincodeStubInterface) (datastructures.Repo, int) {
-	repo, _ := datastructures.CreateNewRepo("", "", 0, nil)
+	repo, _ := datastructures.CreateNewRepo("", "","", 0, nil)
 	master, _ := datastructures.CreateNewRepoBranch("master", "client", 0, nil)
 	repo.AddBranch(master)
 	pushes := contract.getAllPushes(stub)
