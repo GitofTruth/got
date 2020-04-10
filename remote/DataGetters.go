@@ -41,7 +41,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 		return repo, errors.New("Could not unmarashal requested repo")
 	}
 	timestamp, _ := strconv.Atoi(structuredRepoData["timeStamp"])
-	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], timestamp, nil)
+	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], structuredRepoData["directoryCID"], timestamp, nil)
 
 	// getting the repo branches
 	branchQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"branch\", \"repoID\": \"%s\"},\"fields\": [\"repoID\", \"branchName\", \"author\", \"timeStamp\"]}", repoHash)

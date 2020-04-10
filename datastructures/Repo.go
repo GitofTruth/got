@@ -8,17 +8,19 @@ import (
 type Repo struct {
 	Name         string                `json:"repoName"`
 	Author       string                `json:"author"`
+	DirectoryCID string 								`json:"directoryCID"`
 	Timestamp    int                   `json:"timeStamp"`
 	CommitHashes map[string]struct{}   `json:"hashes"`
 	Branches     map[string]RepoBranch `json:"branches"`
 }
 
-func CreateNewRepo(name string, author string, timestamp int, branches map[string]RepoBranch) (Repo, error) {
+func CreateNewRepo(name string, author string, directoryCID string , timestamp int, branches map[string]RepoBranch) (Repo, error) {
 	var repo Repo
 
 	repo.Name = name
 	repo.Author = author
 	repo.Timestamp = timestamp
+	repo.DirectoryCID = directoryCID
 	repo.CommitHashes = make(map[string]struct{})
 
 	// the first commit
@@ -47,7 +49,7 @@ func UnmarashalRepo(objectString string) (Repo, error) {
 	var unmarashaledRepo Repo
 	json.Unmarshal([]byte(objectString), &unmarashaledRepo)
 
-	repo, _ := CreateNewRepo(unmarashaledRepo.Name, unmarashaledRepo.Author, unmarashaledRepo.Timestamp, nil)
+	repo, _ := CreateNewRepo(unmarashaledRepo.Name, unmarashaledRepo.Author, unmarashaledRepo.DirectoryCID, unmarashaledRepo.Timestamp, nil)
 
 	// var repo Repo
 

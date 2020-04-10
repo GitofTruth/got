@@ -31,7 +31,7 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 	pair.key = string(repoHash)
 
-	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "timeStamp": strconv.Itoa(repo.Timestamp)}
+	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "directoryCID": repo.DirectoryCID, "timeStamp": strconv.Itoa(repo.Timestamp)}
 	pair.value, _ = json.Marshal(value)
 
 	list = append(list, pair)
