@@ -93,6 +93,17 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("PushLog is invalid!")
 	}
 
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	repo.DirectoryCID = pushLog.DirectoryCID
+
+	repoPairs, _ := GenerateRepoDBPair(stub, repo)
+	applyPairs(stub, repoPairs)
+
+
 	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(stub, args[0], args[1], pushLog)
 	applyPairs(stub, commitsPairs)
 
