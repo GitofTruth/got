@@ -7,7 +7,8 @@ import (
 	"github.com/GitofTruth/GoT/datastructures"
 )
 
-//should get info about current user, connect to send transactions to a contract and send transactions accordingly
+// should get info about current user, connect to send transactions to a contract and send transactions accordingly
+// Go Client is currently obsolete, only nodeJS is currently supported.
 type Client struct {
 	LastPush   int
 	LocalRepo  datastructures.Repo
@@ -42,7 +43,7 @@ func (cli *Client) CreatePushMessage(m int) (string, error) {
 		n = n + 1
 	}
 
-	push, _ := datastructures.CreateNewPushLog(branch.Name, branchcommits)
+	push, _ := datastructures.CreateNewPushLog("repo", branch.Name, branchcommits)
 	pushasbytes, _ := json.Marshal(push)
 	argsStr, _ := json.Marshal(common.CreateNewArgsList("push", string(pushasbytes)))
 
@@ -58,10 +59,10 @@ func (cli *Client) CreateBranchMessage(branch *datastructures.RepoBranch) (strin
 }
 
 func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (string, error) {
-	commit, _ := datastructures.CreateNewCommitLog("Testing the contract", "mickey", "mickey", 0, "COMMITHASH", nil, nil)
+	commit, _ := datastructures.CreateNewCommitLog("Testing the contract", "mickey", "mickey", 0, "COMMITHASH", nil, nil, nil, nil)
 	pushes := make([]datastructures.CommitLog, 1)
 	pushes[0] = commit
-	push, _ := datastructures.CreateNewPushLog("master", pushes)
+	push, _ := datastructures.CreateNewPushLog("repo", "master", pushes)
 	pushasbytes, _ := json.Marshal(push)
 	argsStr, _ := json.Marshal(common.CreateNewArgsList("push", string(pushasbytes)))
 
@@ -70,10 +71,10 @@ func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (st
 
 func (cli *Client) CreateAddNewRepoMessage() string {
 
-	x, _ := datastructures.CreateNewRepo("GoT", "hassan", 0, nil)
+	x, _ := datastructures.CreateNewRepo("repo", "GoT", "hassan", 0, nil, nil, nil)
 	branch, _ := datastructures.CreateNewRepoBranch("master", "masterCreator", 1, nil)
 	x.AddBranch(branch)
-	commit, _ := datastructures.CreateNewCommitLog("message", "mickey", "mickeyAsCommiter", 3, "*************", nil, nil)
+	commit, _ := datastructures.CreateNewCommitLog("message", "mickey", "mickeyAsCommiter", 3, "*************", nil, nil, nil, nil)
 	x.AddCommitLog(commit, "master")
 	str, _ := json.Marshal(x)
 
@@ -81,12 +82,3 @@ func (cli *Client) CreateAddNewRepoMessage() string {
 
 	return string(argsStr)
 }
-
-//to invoke
-//peer chaincode invoke -o "$ORDERER_ADDRESS" -C "$CC_CHANNEL_ID" -n "$CC_NAME"  -c "$CC_INVOKE_ARGS"
-//CC_INVOKE_ARGS?
-//'{"Args":["push","",""]}'
-
-//CC_QUERY_ARGS?
-//to query
-//QUERY_RESULT=$(peer chaincode query -C "$CC_CHANNEL_ID" -n "$CC_NAME"  -c "$CC_QUERY_ARGS")

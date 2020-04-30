@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	client "github.com/GitofTruth/GoT/client"
 	"github.com/GitofTruth/GoT/datastructures"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -41,7 +42,8 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 		return repo, errors.New("Could not unmarashal requested repo")
 	}
 	timestamp, _ := strconv.Atoi(structuredRepoData["timeStamp"])
-	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], structuredRepoData["directoryCID"], timestamp, nil)
+	users, _ := contract.getRepoUsers(stub, repoHash)
+	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], structuredRepoData["directoryCID"], timestamp, nil, structuredRepoData["encryptionKey"], users)
 
 	// getting the repo branches
 	branchQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"branch\", \"repoID\": \"%s\"},\"fields\": [\"repoID\", \"branchName\", \"author\", \"timeStamp\"]}", repoHash)
@@ -104,7 +106,11 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			_ = json.Unmarshal([]byte(structuredCommitData["parentHashes"]), &ph)
 			var s []byte
 			_ = json.Unmarshal([]byte(structuredCommitData["signature"]), &s)
-			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s)
+			var enc interface{}
+			_ = json.Unmarshal([]byte(structuredCommitData["encryptionKey"]), &enc)
+			var sh map[string]string
+			_ = json.Unmarshal([]byte(structuredCommitData["storageHashes"]), &sh)
+			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s, enc, sh)
 			repo.AddCommitLog(commit, branch.Name)
 		}
 	}
@@ -277,6 +283,139 @@ func (contract *RepoContract) queryLastBranchCommit(stub shim.ChaincodeStubInter
 	}
 
 	return shim.Success([]byte(hash))
+}
+
+func (contract *RepoContract) getUserInfo(stub shim.ChaincodeStubInterface, userName string) (client.UserInfo, peer.Response) {
+	var userInfo client.UserInfo
+
+	userQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"user\", \"userName\": \"%s\"},\"fields\": [\"userName\", \"publicKey\"]}", userName)
+	userResultsIterator, err := stub.GetQueryResult(userQueryString)
+	if err != nil {
+		fmt.Println("Could not find Requested User: ", err)
+		return userInfo, shim.Error("User does not exist")
+	}
+	defer userResultsIterator.Close()
+
+	for userResultsIterator.HasNext() {
+		userString, err := userResultsIterator.Next()
+		if err != nil {
+			fmt.Println("Could not proceed to next user: ", err)
+			return userInfo, shim.Error("Could not proceed to next user")
+		}
+
+		structuredUserData := map[string]string{}
+		err = json.Unmarshal([]byte(userString.Value), &structuredUserData)
+		fmt.Println("Found This User: \t", structuredUserData)
+		if err != nil {
+			fmt.Println("Could not unmarashal requested Branch: ", err)
+			return userInfo, shim.Error("Could not unmarashal requested Branch")
+		}
+		userInfo.UserName = structuredUserData["userName"]
+		userInfo.PublicKey = structuredUserData["publicKey"]
+	}
+
+	return userInfo, shim.Success([]byte(""))
+}
+
+func (contract *RepoContract) queryUser(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// userName
+
+	fmt.Println("Querying the ledger .. queryUser", args)
+
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1.")
+	}
+
+	userInfo, failMessage := contract.getUserInfo(stub, args[0])
+	if failMessage.Message != "" {
+		return failMessage
+	}
+
+	seralized, _ := json.Marshal(userInfo)
+	return shim.Success([]byte(string(seralized)))
+}
+
+func (contract *RepoContract) queryUsers(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// [userName1 userName2]
+
+	fmt.Println("Querying the ledger .. queryUser", args)
+
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1.")
+	}
+
+	userInfos := make([]client.UserInfo, 0)
+	var userNames []string
+	_ = json.Unmarshal([]byte(args[0]), &userNames)
+
+	for _, username := range userNames {
+		userInfo, failMessage := contract.getUserInfo(stub, username)
+		if failMessage.Message != "" {
+			continue
+		}
+		userInfos = append(userInfos, userInfo)
+	}
+
+	seralized, _ := json.Marshal(userInfos)
+	return shim.Success([]byte(string(seralized)))
+}
+
+func (contract *RepoContract) getRepoUsers(stub shim.ChaincodeStubInterface, repoHash string) (map[string]datastructures.UserAccess, peer.Response) {
+
+	users := make(map[string]datastructures.UserAccess, 0)
+
+	accessQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"userAccess\", \"repoHash\": \"%s\"},\"fields\": [\"authorized\", \"userAccess\", \"authorizer\"]}", repoHash)
+	accessResultsIterator, err := stub.GetQueryResult(accessQueryString)
+	if err != nil {
+		fmt.Println("Could not find Repo Access: ", err)
+		return users, shim.Error("Repo Access does not exist")
+	}
+	defer accessResultsIterator.Close()
+
+	for accessResultsIterator.HasNext() {
+		accessString, err := accessResultsIterator.Next()
+		if err != nil {
+			fmt.Println("Could not proceed to user access: ", err)
+			return users, shim.Error("Could not proceed to next user access")
+		}
+
+		structuredAccessData := map[string]string{}
+		err = json.Unmarshal([]byte(accessString.Value), &structuredAccessData)
+		fmt.Println("Found This User: \t", structuredAccessData)
+		if err != nil {
+			fmt.Println("Could not unmarashal requested Branch: ", err)
+			return users, shim.Error("Could not unmarashal requested Branch")
+		}
+		access, err := strconv.Atoi(structuredAccessData["userAccess"])
+		if err != nil {
+			users[structuredAccessData["authorized"]] = datastructures.UserAccess(access)
+		} else {
+			fmt.Println("Could not parse UserAcess: ", err)
+			return users, shim.Error("Could not parse UserAcess")
+		}
+	}
+
+	return users, shim.Success([]byte(""))
+}
+
+func (contract *RepoContract) queryRepoUserAccess(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName
+
+	fmt.Println("Querying the ledger .. queryRepoUserAccess", args)
+
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2.")
+	}
+
+	repoHash := GetRepoKey(args[0], args[1])
+
+	users, failMessage := contract.getRepoUsers(stub, repoHash)
+	if failMessage.Message != "" {
+		return failMessage
+	}
+
+	seralized, _ := json.Marshal(users)
+	return shim.Success([]byte(string(seralized)))
 }
 
 // indexName := "index-Branch"

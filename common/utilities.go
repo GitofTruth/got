@@ -1,14 +1,6 @@
 package common
 
-import (
-	"fmt"
-
-	"github.com/GitofTruth/GoT/datastructures"
-)
-
-func GetPushesDifference(local datastructures.Repo, remote datastructures.Repo) {
-	fmt.Println("hello")
-}
+import ()
 
 type ArgsList struct {
 	Args []string

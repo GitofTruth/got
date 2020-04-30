@@ -1,6 +1,7 @@
 package main
 
 import (
+	client "github.com/GitofTruth/GoT/client"
 	"github.com/GitofTruth/GoT/datastructures"
 
 	"strconv"
@@ -31,7 +32,7 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 	pair.key = string(repoHash)
 
-	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "directoryCID": repo.DirectoryCID, "timeStamp": strconv.Itoa(repo.Timestamp)}
+	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "directoryCID": repo.DirectoryCID, "timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": repo.EncryptionKey, "accessLogs": repo.AccessLogs}
 	pair.value, _ = json.Marshal(value)
 
 	list = append(list, pair)
@@ -85,7 +86,7 @@ func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author str
 	// jsonKey, _ := json.Marshal(key)
 	pair.key = string(branchCommitIndexKey)
 
-	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": strconv.Itoa(commitLog.CommitterTimestamp), "parentHashes": commitLog.Parenthashes, "signature": commitLog.Signature}
+	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": strconv.Itoa(commitLog.CommitterTimestamp), "parentHashes": commitLog.Parenthashes, "signature": commitLog.Signature, "encryptionKey": commitLog.EncryptionKey, "storageHashes": commitLog.StorageHashes}
 	pair.value, _ = json.Marshal(value)
 
 	return pair, nil
@@ -148,4 +149,94 @@ func GetRepoKey(author string, repoName string) string {
 	// fmt.Println("Repo String Hash keyBytes String: " + string(keyBytes))
 
 	return sEnc
+}
+
+func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate client.UserUpdate) ([]LedgerPair, error) {
+
+	list := make([]LedgerPair, 0)
+	if userUpdate.UserUpdateType == client.CreateNewUser || userUpdate.UserUpdateType == client.ChangeUserPublicKey {
+		var pair LedgerPair
+		indexName := "index-user"
+
+		userIndexKey, _ := stub.CreateCompositeKey(indexName, []string{userUpdate.UserName})
+		pair.key = string(userIndexKey)
+		fmt.Println("userIndexKey : \n" + pair.key + "\n")
+
+		pubKey := userUpdate.PublicKey.(string)
+		value := map[string]interface{}{"docName": "user", "userName": userUpdate.UserName, "publicKey": pubKey}
+		pair.value, _ = json.Marshal(value)
+
+		list = append(list, pair)
+	} else if userUpdate.UserUpdateType == client.DeleteUser {
+		var pair LedgerPair
+		indexName := "index-user"
+
+		userIndexKey, _ := stub.CreateCompositeKey(indexName, []string{userUpdate.UserName})
+		pair.key = string(userIndexKey)
+		fmt.Println("userIndexKey : \n" + pair.key + "\n")
+
+		value := map[string]interface{}{"docName": "user", "userName": "", "publicKey": ""}
+		pair.value, _ = json.Marshal(value)
+
+		list = append(list, pair)
+	} else if userUpdate.UserUpdateType == client.DeleteUser {
+		var pair LedgerPair
+		indexName := "index-user"
+
+		//removing old user
+		userIndexKey, _ := stub.CreateCompositeKey(indexName, []string{userUpdate.OldUserName})
+		pair.key = string(userIndexKey)
+		fmt.Println("userIndexKey : \n" + pair.key + "\n")
+
+		value := map[string]interface{}{"docName": "user", "userName": "", "publicKey": ""}
+		pair.value, _ = json.Marshal(value)
+
+		list = append(list, pair)
+
+		//adding new user
+		userIndexKey, _ = stub.CreateCompositeKey(indexName, []string{userUpdate.UserName})
+		pair.key = string(userIndexKey)
+		fmt.Println("userIndexKey : \n" + pair.key + "\n")
+
+		pubKey := userUpdate.PublicKey.(string)
+		value = map[string]interface{}{"docName": "user", "userName": userUpdate.UserName, "publicKey": pubKey}
+		pair.value, _ = json.Marshal(value)
+
+		// TODO: update all the user has access to :D
+
+		list = append(list, pair)
+	}
+
+	return list, nil
+}
+
+func GenerateRepoUserAccessDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, authorized string, userAccess string, authorizer string) (LedgerPair, error) {
+
+	repoHash := GetRepoKey(author, repoName)
+
+	var pair LedgerPair
+
+	// key := map[string]interface{}{"repoID": repoHash, "branchName": branch.Name}
+	indexName := "repoUserAccess-Branch"
+	repoUserAccessIndexKey, _ := stub.CreateCompositeKey(indexName, []string{repoHash, authorized})
+
+	fmt.Println(indexName + " : \n" + repoUserAccessIndexKey)
+	pair.key = string(repoUserAccessIndexKey)
+
+	value := map[string]interface{}{"docName": "userAccess", "repoHash": repoHash, "authorized": authorized, "userAccess": userAccess, "authorizer": authorizer}
+	pair.value, _ = json.Marshal(value)
+
+	return pair, nil
+}
+
+func GenerateRepoUserAccessesDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
+
+	list := make([]LedgerPair, 0)
+
+	for authorized, userAccess := range repo.Users {
+		pair, _ := GenerateRepoUserAccessDBPair(stub, repo.Author, repo.Name, authorized, strconv.Itoa(int(userAccess)), repo.Author)
+		list = append(list, pair)
+	}
+
+	return list, nil
 }

@@ -5,16 +5,114 @@ import (
 	"fmt"
 )
 
-type Repo struct {
-	Name         string                `json:"repoName"`
-	Author       string                `json:"author"`
-	DirectoryCID string 								`json:"directoryCID"`
-	Timestamp    int                   `json:"timeStamp"`
-	CommitHashes map[string]struct{}   `json:"hashes"`
-	Branches     map[string]RepoBranch `json:"branches"`
+type UserAccess int
+
+const (
+	ReadWriteAccess    UserAccess = 1
+	CollaboratorAccess UserAccess = 2
+	OwnerAccess        UserAccess = 3
+	ReovkedAccess      UserAccess = 4
+	NeverSetAccess     UserAccess = 5
+)
+
+type AccessLog struct {
+	Authorizer string `json:"authorizer"`
+	Authorized string `json:"authorized"`
+	UserAccess `json:"userAccess"`
 }
 
-func CreateNewRepo(name string, author string, directoryCID string , timestamp int, branches map[string]RepoBranch) (Repo, error) {
+// TODO: should we check for mutex or the hyperledger handles this???
+// TODO: now handle the 	EncryptionKey interface{}, Users map[string]UserAccessAccessLogs, []AccessLog	into Coachdb
+
+type Repo struct {
+	Name         string `json:"repoName"`
+	Author       string `json:"author"`
+	DirectoryCID string `json:"directoryCID"`
+	Timestamp    int    `json:"timeStamp"`
+
+	CommitHashes map[string]struct{}   `json:"hashes"`
+	Branches     map[string]RepoBranch `json:"branches"`
+
+	EncryptionKey interface{}           `json:"encryptionKey"`
+	Users         map[string]UserAccess `json:"users"`
+	AccessLogs    []AccessLog           `json:"accessLogs"`
+}
+
+func (repo *Repo) GetUserAccess(userName string) UserAccess {
+	if val, exist := repo.Users[userName]; exist {
+		return val
+	}
+	return NeverSetAccess
+}
+
+// anyone included in the repo can read / write
+func (repo *Repo) CanEdit(userName string) bool {
+	if val, exist := repo.Users[userName]; exist {
+		return val != ReovkedAccess
+	}
+	return false
+}
+
+// can authorize or revoke ReadWriteAccess
+func (repo *Repo) CanAuthorize(userName string) bool {
+	if val, exist := repo.Users[userName]; exist {
+		return val != ReovkedAccess && val != ReadWriteAccess
+	}
+	return false
+}
+
+// can Auhtorize or revoke collaborator
+func (repo *Repo) CanAuthorizeCollaborator(userName string) bool {
+	if val, exist := repo.Users[userName]; exist {
+		return val == OwnerAccess
+	}
+	return false
+}
+
+// we have a table here of three 3 vars to one
+func (repo *Repo) ValidUpdateAccess(authorized string, userAccess UserAccess, authorizer string) bool {
+
+	if userAccess == ReadWriteAccess || userAccess == ReovkedAccess {
+		if (repo.CanAuthorize(authorizer) && !repo.CanAuthorize(authorized)) || repo.CanAuthorizeCollaborator(authorizer) {
+			return repo.GetUserAccess(authorized) != NeverSetAccess
+		}
+	} else if repo.CanAuthorizeCollaborator(authorizer) {
+		// TODO: check if you want to have many owners. maybe owners only revoke themselves?
+		return repo.GetUserAccess(authorized) != NeverSetAccess
+	}
+
+	return false
+}
+
+func (repo *Repo) UpdateAccess(authorized string, userAccess UserAccess, authorizer string, encryptionKey interface{}) bool {
+
+	if repo.ValidUpdateAccess(authorized, userAccess, authorizer) {
+		if val, exist := repo.Users[authorized]; exist {
+			if val == userAccess {
+				return false
+			}
+		}
+
+		// you are actually doing something here
+		var accessLog AccessLog
+		accessLog.Authorizer = authorizer
+		accessLog.Authorized = authorized
+		accessLog.UserAccess = userAccess
+
+		repo.AccessLogs = append(repo.AccessLogs, accessLog)
+		repo.Users[authorized] = userAccess
+
+		if encryptionKey != nil {
+			repo.EncryptionKey = encryptionKey
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func CreateNewRepo(name string, author string, directoryCID string, timestamp int, branches map[string]RepoBranch, encryptionKey interface{}, users map[string]UserAccess) (Repo, error) {
 	var repo Repo
 
 	repo.Name = name
@@ -22,6 +120,14 @@ func CreateNewRepo(name string, author string, directoryCID string , timestamp i
 	repo.Timestamp = timestamp
 	repo.DirectoryCID = directoryCID
 	repo.CommitHashes = make(map[string]struct{})
+	repo.EncryptionKey = encryptionKey
+
+	if users != nil {
+		repo.Users = users
+	} else {
+		repo.Users = make(map[string]UserAccess, 0)
+		repo.Users[repo.Author] = OwnerAccess
+	}
 
 	// the first commit
 	var empty struct{}
@@ -49,7 +155,9 @@ func UnmarashalRepo(objectString string) (Repo, error) {
 	var unmarashaledRepo Repo
 	json.Unmarshal([]byte(objectString), &unmarashaledRepo)
 
-	repo, _ := CreateNewRepo(unmarashaledRepo.Name, unmarashaledRepo.Author, unmarashaledRepo.DirectoryCID, unmarashaledRepo.Timestamp, nil)
+	// TODO: check number of owenrs for first creation in the contract
+
+	repo, _ := CreateNewRepo(unmarashaledRepo.Name, unmarashaledRepo.Author, unmarashaledRepo.DirectoryCID, unmarashaledRepo.Timestamp, nil, unmarashaledRepo.EncryptionKey, unmarashaledRepo.Users)
 
 	// var repo Repo
 

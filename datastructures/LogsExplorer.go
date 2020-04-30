@@ -34,11 +34,11 @@ func CreateNewLogsExplorer(path string) (LogsExplorer, error) {
 }
 
 func (le *LogsExplorer) OpenRepo(path string) (bool, error) {
-	repo, err := git.PlainOpen(path)
-	if err != nil {
-		panic(err)
-	}
-	le.GitRepo = repo
+	// repo, err := git.PlainOpen(path)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// le.GitRepo = repo
 	return true, nil
 }
 
@@ -57,35 +57,35 @@ func (le *LogsExplorer) GetInternalRepo() (Repo, error) {
 	//author first commit
 	//branch >> commits
 
-	le.LoadLogs()
+	// le.LoadLogs()
+	//
+	// if le.Logs != nil {
+	// 	fmt.Println(le.Logs)
+	// }
+	//
+	// logs := make(map[string]CommitLog)
+	// auth := ""
+	// time := 0
+	// for {
+	// 	cmm, err := le.Logs.Next()
+	// 	if err != nil {
+	// 		break
+	// 	}
+	// 	parentHashes := make([]string, 0)
+	// 	for _, hashplumb := range cmm.ParentHashes {
+	// 		parentHashes = append(parentHashes, string([]byte(hashplumb[:])))
+	// 	}
+	// 	logs[string([]byte(cmm.Hash[:]))], _ = CreateNewCommitLog(cmm.Message, cmm.Author.Name, cmm.Committer.Name, cmm.Committer.When.Second(), string([]byte(cmm.Hash[:])), parentHashes, nil)
+	// 	auth = cmm.Author.Name
+	// 	time = cmm.Committer.When.Second()
+	// }
+	//
+	// //logs map[string]CommitLog
+	// branch, _ := CreateNewRepoBranch("master", auth, time, logs)
+	// branches := make(map[string]RepoBranch)
+	// branches[branch.Name] = branch
 
-	if le.Logs != nil {
-		fmt.Println(le.Logs)
-	}
-
-	logs := make(map[string]CommitLog)
-	auth := ""
-	time := 0
-	for {
-		cmm, err := le.Logs.Next()
-		if err != nil {
-			break
-		}
-		parentHashes := make([]string, 0)
-		for _, hashplumb := range cmm.ParentHashes {
-			parentHashes = append(parentHashes, string([]byte(hashplumb[:])))
-		}
-		logs[string([]byte(cmm.Hash[:]))], _ = CreateNewCommitLog(cmm.Message, cmm.Author.Name, cmm.Committer.Name, cmm.Committer.When.Second(), string([]byte(cmm.Hash[:])), parentHashes, nil)
-		auth = cmm.Author.Name
-		time = cmm.Committer.When.Second()
-	}
-
-	//logs map[string]CommitLog
-	branch, _ := CreateNewRepoBranch("master", auth, time, logs)
-	branches := make(map[string]RepoBranch)
-	branches[branch.Name] = branch
-
-	return CreateNewRepo(auth,"", "DirectoryCID", time, branches)
+	return CreateNewRepo("auth", "", "DirectoryCID", 0, nil, nil, nil)
 }
 
 //get repo general info
@@ -105,12 +105,12 @@ func (le *LogsExplorer) PrintAllLogs() bool {
 	// })
 
 	for {
-		fmt.Println("starting iterating")
-		cmm, err := le.Logs.Next()
-		if err != nil {
-			break
-		}
-		fmt.Println(cmm)
+		// fmt.Println("starting iterating")
+		// cmm, err := le.Logs.Next()
+		// if err != nil {
+		// 	break
+		// }
+		// fmt.Println(cmm)
 	}
 
 	return true

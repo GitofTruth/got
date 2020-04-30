@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
+	client "github.com/GitofTruth/GoT/client"
 	"github.com/GitofTruth/GoT/datastructures"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -10,17 +12,18 @@ import (
 )
 
 func applyPair(stub shim.ChaincodeStubInterface, pair LedgerPair) bool {
-	stub.PutState(pair.key, pair.value)
+	fmt.Println("Key:\t" + string(pair.key))
+	fmt.Println("Value:\t" + string(pair.value))
+	fmt.Println("\n")
+
+	stub.PutState(string(pair.key), pair.value)
 	return true
 }
 
 func applyPairs(stub shim.ChaincodeStubInterface, pairs []LedgerPair) bool {
-	for _, pair := range pairs {
-
-		fmt.Println("Key: " + string(pair.key))
-		fmt.Println("Value: " + string(pair.value))
-
-		stub.PutState(string(pair.key), pair.value)
+	for ind, pair := range pairs {
+		fmt.Println("Adding index:\t", ind)
+		applyPair(stub, pair)
 	}
 	return true
 }
@@ -40,6 +43,9 @@ func (contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface, args 
 
 	repoPairs, _ := GenerateRepoDBPair(stub, repo)
 	applyPairs(stub, repoPairs)
+
+	accessPairs, _ := GenerateRepoUserAccessesDBPair(stub, repo)
+	applyPairs(stub, accessPairs)
 
 	branchPairs, _ := GenerateRepoBranchesDBPair(stub, repo)
 	applyPairs(stub, branchPairs)
@@ -103,14 +109,76 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 	repoPairs, _ := GenerateRepoDBPair(stub, repo)
 	applyPairs(stub, repoPairs)
 
-
 	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(stub, args[0], args[1], pushLog)
 	applyPairs(stub, commitsPairs)
 
 	return shim.Success(nil)
 }
 
-// func(contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+func (contract *RepoContract) addUserUpdate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// args[0] >> UserMessage with content as UserUpdate
+
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+
+	userMessage, err := client.UnmarashalUserMessage(args[0])
+	if err != nil {
+		return shim.Error("userMessage is invalid!")
+	}
+
+	// TODO: check userDoesnot exist
+
+	// check signature
+	userUpdate, err := client.UnmarashalUserUpdate(userMessage.Content)
+	if err != nil {
+		return shim.Error("userUpdate is invalid!")
+	}
+
+	// TODO: publicKey retrieval
+	pubKey := userUpdate.PublicKey
+	userNameMatchingNoChange:= (userMessage.UserName == userUpdate.UserName) || (userUpdate.UserUpdateType != client.ChangeUserUserName)
+	userNameMatchingChange:= (userMessage.UserName == userUpdate.OldUserName) && (userUpdate.UserUpdateType == client.ChangeUserUserName)
+	userNameMatching:= userNameMatchingNoChange || userNameMatchingChange
+	if userMessage.VerifySignature(pubKey) && userNameMatching {
+		pairs, _ := GenerateUserUpdateDBPairs(stub, userUpdate)
+		applyPairs(stub, pairs)
+	}
+
+	return shim.Success(nil)
+}
+
+func (contract *RepoContract) updateRepoUserAccess(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName, authorized, userAccess, authorizer, encryptionKey/nil
+
+	if len(args) != 6 {
+		return shim.Error("Incorrect number of arguments. Expecting 6")
+	}
+
+	fmt.Println("trying to process:\t", args)
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	// TODO: check userDoesnot exist
+	access, err := strconv.Atoi(args[3])
+	if err == nil {
+		return shim.Error("could not parse access")
+	}
+	if repo.UpdateAccess(args[2], datastructures.UserAccess(access), args[4], args[5]) {
+		repoPairs, _ := GenerateRepoDBPair(stub, repo)
+		applyPairs(stub, repoPairs)
+		pair, _ := GenerateRepoUserAccessDBPair(stub, args[0], args[1], args[2], args[3], args[4])
+		applyPair(stub, pair)
+		shim.Success(nil)
+	}
+
+	return shim.Error("UserAccess was not set!")
+}
+
+// func(contract *RepoContract) NewSetterFunction(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 //   // Input assumption
 //   // Example:
 //   // Required Tables
