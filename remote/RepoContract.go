@@ -19,7 +19,7 @@ func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Resp
 
 	function, args := stub.GetFunctionAndParameters()
 
-	fmt.Println("Starting invokation .. \nfunctionName:\t"+ function + "\nargs:\t", args )
+	fmt.Println("****************************************\nStarting invokation .. \nfunctionName:\t"+function+"\nargs:\t\n", args)
 	defer fmt.Println("Invokation end \n\n")
 
 	if function == "addNewRepo" {

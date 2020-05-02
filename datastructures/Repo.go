@@ -74,11 +74,13 @@ func (repo *Repo) ValidUpdateAccess(authorized string, userAccess UserAccess, au
 
 	if userAccess == ReadWriteAccess || userAccess == ReovkedAccess {
 		if (repo.CanAuthorize(authorizer) && !repo.CanAuthorize(authorized)) || repo.CanAuthorizeCollaborator(authorizer) {
-			return repo.GetUserAccess(authorized) != NeverSetAccess
+			//return repo.GetUserAccess(authorized) != NeverSetAccess
+			return true
 		}
 	} else if repo.CanAuthorizeCollaborator(authorizer) {
 		// TODO: check if you want to have many owners. maybe owners only revoke themselves?
-		return repo.GetUserAccess(authorized) != NeverSetAccess
+		// return repo.GetUserAccess(authorized) != NeverSetAccess
+		return true
 	}
 
 	return false

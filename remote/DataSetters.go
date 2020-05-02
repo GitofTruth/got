@@ -14,7 +14,6 @@ import (
 func applyPair(stub shim.ChaincodeStubInterface, pair LedgerPair) bool {
 	fmt.Println("Key:\t" + string(pair.key))
 	fmt.Println("Value:\t" + string(pair.value))
-	fmt.Println("\n")
 
 	stub.PutState(string(pair.key), pair.value)
 	return true
@@ -135,11 +134,16 @@ func (contract *RepoContract) addUserUpdate(stub shim.ChaincodeStubInterface, ar
 		return shim.Error("userUpdate is invalid!")
 	}
 
+	userInfo, _ := contract.getUserInfo(stub, userUpdate.UserName)
+	if userUpdate.UserUpdateType == client.CreateNewUser && userInfo.UserName != "" {
+		return shim.Error("User already exist")
+	}
+
 	// TODO: publicKey retrieval
 	pubKey := userUpdate.PublicKey
-	userNameMatchingNoChange:= (userMessage.UserName == userUpdate.UserName) || (userUpdate.UserUpdateType != client.ChangeUserUserName)
-	userNameMatchingChange:= (userMessage.UserName == userUpdate.OldUserName) && (userUpdate.UserUpdateType == client.ChangeUserUserName)
-	userNameMatching:= userNameMatchingNoChange || userNameMatchingChange
+	userNameMatchingNoChange := (userMessage.UserName == userUpdate.UserName) || (userUpdate.UserUpdateType != client.ChangeUserUserName)
+	userNameMatchingChange := (userMessage.UserName == userUpdate.OldUserName) && (userUpdate.UserUpdateType == client.ChangeUserUserName)
+	userNameMatching := userNameMatchingNoChange || userNameMatchingChange
 	if userMessage.VerifySignature(pubKey) && userNameMatching {
 		pairs, _ := GenerateUserUpdateDBPairs(stub, userUpdate)
 		applyPairs(stub, pairs)
@@ -164,7 +168,7 @@ func (contract *RepoContract) updateRepoUserAccess(stub shim.ChaincodeStubInterf
 
 	// TODO: check userDoesnot exist
 	access, err := strconv.Atoi(args[3])
-	if err == nil {
+	if err != nil {
 		return shim.Error("could not parse access")
 	}
 	if repo.UpdateAccess(args[2], datastructures.UserAccess(access), args[4], args[5]) {
@@ -172,7 +176,7 @@ func (contract *RepoContract) updateRepoUserAccess(stub shim.ChaincodeStubInterf
 		applyPairs(stub, repoPairs)
 		pair, _ := GenerateRepoUserAccessDBPair(stub, args[0], args[1], args[2], args[3], args[4])
 		applyPair(stub, pair)
-		shim.Success(nil)
+		return shim.Success(nil)
 	}
 
 	return shim.Error("UserAccess was not set!")

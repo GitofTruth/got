@@ -31,8 +31,8 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 	// jsonKey, _ := json.Marshal(key)
 
 	pair.key = string(repoHash)
-
-	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "directoryCID": repo.DirectoryCID, "timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": repo.EncryptionKey, "accessLogs": repo.AccessLogs}
+	accessLogs, _ := json.Marshal(repo.AccessLogs)
+	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "directoryCID": repo.DirectoryCID, "timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": repo.EncryptionKey, "accessLogs": accessLogs}
 	pair.value, _ = json.Marshal(value)
 
 	list = append(list, pair)
@@ -154,6 +154,7 @@ func GetRepoKey(author string, repoName string) string {
 func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate client.UserUpdate) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
+	fmt.Println(userUpdate.UserUpdateType)
 	if userUpdate.UserUpdateType == client.CreateNewUser || userUpdate.UserUpdateType == client.ChangeUserPublicKey {
 		var pair LedgerPair
 		indexName := "index-user"
@@ -179,14 +180,13 @@ func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate clie
 		pair.value, _ = json.Marshal(value)
 
 		list = append(list, pair)
-	} else if userUpdate.UserUpdateType == client.DeleteUser {
+	} else if userUpdate.UserUpdateType == client.ChangeUserUserName {
 		var pair LedgerPair
 		indexName := "index-user"
 
 		//removing old user
 		userIndexKey, _ := stub.CreateCompositeKey(indexName, []string{userUpdate.OldUserName})
 		pair.key = string(userIndexKey)
-		fmt.Println("userIndexKey : \n" + pair.key + "\n")
 
 		value := map[string]interface{}{"docName": "user", "userName": "", "publicKey": ""}
 		pair.value, _ = json.Marshal(value)
@@ -196,7 +196,7 @@ func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate clie
 		//adding new user
 		userIndexKey, _ = stub.CreateCompositeKey(indexName, []string{userUpdate.UserName})
 		pair.key = string(userIndexKey)
-		fmt.Println("userIndexKey : \n" + pair.key + "\n")
+		fmt.Println("userIndexKey : \t" + pair.key )
 
 		pubKey := userUpdate.PublicKey.(string)
 		value = map[string]interface{}{"docName": "user", "userName": userUpdate.UserName, "publicKey": pubKey}

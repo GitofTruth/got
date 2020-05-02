@@ -16,7 +16,8 @@ import (
 func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, args []string) (datastructures.Repo, error) {
 	// repoAuthor, repoName
 
-	fmt.Println("Querying the ledger .. getRepoInstance", args)
+	fmt.Println("\n---------------------------\nQuerying the ledger .. getRepoInstance", args)
+	defer fmt.Println("---------------------------")
 
 	if len(args) < 2 {
 		var repo datastructures.Repo
@@ -388,10 +389,10 @@ func (contract *RepoContract) getRepoUsers(stub shim.ChaincodeStubInterface, rep
 		}
 		access, err := strconv.Atoi(structuredAccessData["userAccess"])
 		if err != nil {
-			users[structuredAccessData["authorized"]] = datastructures.UserAccess(access)
-		} else {
-			fmt.Println("Could not parse UserAcess: ", err)
+			fmt.Println("Could not parse UserAcess: ", access, err)
 			return users, shim.Error("Could not parse UserAcess")
+		} else {
+			users[structuredAccessData["authorized"]] = datastructures.UserAccess(access)
 		}
 	}
 
