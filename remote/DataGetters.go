@@ -77,7 +77,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 		repo.AddBranch(branch)
 
 		//adding branch commits
-		commitsQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"commit\", \"repoID\": \"%s\", \"branchName\": \"%s\"},\"fields\": [\"repoID\", \"branchName\",\"hash\", \"message\", \"author\", \"committer\", \"committerTimestamp\", \"CommitParenthashes\", \"signature\"]}", repoHash, branch.Name)
+		commitsQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"commit\", \"repoID\": \"%s\", \"branchName\": \"%s\"},\"fields\": [\"repoID\", \"branchName\",\"hash\", \"message\", \"author\", \"committer\", \"committerTimestamp\", \"CommitParenthashes\", \"signature\", \"storageHashes\"]}", repoHash, branch.Name)
 		commitsResultsIterator, err := stub.GetQueryResult(commitsQueryString)
 		if err != nil {
 			var repo datastructures.Repo
