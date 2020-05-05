@@ -233,13 +233,14 @@ func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterfac
 	fmt.Println("Found this branch:", branch)
 
 	commits := make([]datastructures.CommitLog, 0)
+
 	//last commit exist?
-	if !repo.IsCommitHash(args[3]) {
+	t := 0
+	if !repo.IsCommitHash(args[3]) && args[3] != "" {
 		fmt.Println("Requested BranchCommit Not found")
 		return shim.Error("Requested BranchCommit Not found")
 	}
-	//last commit time
-	t := 0
+
 	if args[3] != "" {
 		t = branch.Logs[args[3]].CommitterTimestamp
 	}
