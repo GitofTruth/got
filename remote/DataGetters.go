@@ -239,7 +239,11 @@ func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterfac
 		return shim.Error("Requested BranchCommit Not found")
 	}
 	//last commit time
-	t := branch.Logs[args[3]].CommitterTimestamp
+	t := 0
+	if(args[3] != ){
+		t = branch.Logs[args[3]].CommitterTimestamp
+	}
+	
 	// get all commits after this time
 	for _, log := range branch.Logs {
 		if log.CommitterTimestamp >= t {
