@@ -86,7 +86,8 @@ func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author str
 	// jsonKey, _ := json.Marshal(key)
 	pair.key = string(branchCommitIndexKey)
 
-	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": strconv.Itoa(commitLog.CommitterTimestamp), "parentHashes": commitLog.Parenthashes, "signature": commitLog.Signature, "encryptionKey": commitLog.EncryptionKey, "storageHashes": commitLog.StorageHashes}
+	storageHashes, _ := json.Marshal(commitLog.StorageHashes)
+	value := map[string]interface{}{"docName": "commit", "repoID": repoHash, "branchName": branchName, "hash": commitLog.Hash, "message": commitLog.Message, "author": commitLog.Author, "committer": commitLog.Committer, "committerTimestamp": strconv.Itoa(commitLog.CommitterTimestamp), "parentHashes": commitLog.Parenthashes, "signature": commitLog.Signature, "encryptionKey": commitLog.EncryptionKey, "storageHashes": string(storageHashes)}
 	pair.value, _ = json.Marshal(value)
 
 	return pair, nil
@@ -196,7 +197,7 @@ func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate clie
 		//adding new user
 		userIndexKey, _ = stub.CreateCompositeKey(indexName, []string{userUpdate.UserName})
 		pair.key = string(userIndexKey)
-		fmt.Println("userIndexKey : \t" + pair.key )
+		fmt.Println("userIndexKey : \t" + pair.key)
 
 		pubKey := userUpdate.PublicKey.(string)
 		value = map[string]interface{}{"docName": "user", "userName": userUpdate.UserName, "publicKey": pubKey}
