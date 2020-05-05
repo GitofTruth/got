@@ -247,7 +247,7 @@ func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterfac
 
 	// get all commits after this time
 	for _, log := range branch.Logs {
-		if log.CommitterTimestamp >= t {
+		if log.CommitterTimestamp > t {
 			commits = append(commits, log)
 		}
 	}
