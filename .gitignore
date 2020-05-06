@@ -10,3 +10,11 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+/client/node_modules
+
+/client/user-wallet/
+
+/GoT-APIs/node_modules
+
+/GoT-APIs/user-wallet/

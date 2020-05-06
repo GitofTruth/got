@@ -1,0 +1,15 @@
+{
+    "index": {
+        "fields": [
+            "tableName",
+            "repoID",
+            "branchName",
+            "hash",
+
+            "parentHash"
+        ]
+    },
+    "ddoc": "index-CommitParenthashes",
+    "name": "index-CommitParenthashes",
+    "type": "json"
+}

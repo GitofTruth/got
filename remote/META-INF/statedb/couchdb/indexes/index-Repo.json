@@ -1,0 +1,15 @@
+{
+    "index": {
+        "fields": [
+            "tableName",
+            "repoID",
+
+            "repoName",
+            "author",
+            "timestamp"
+        ]
+    },
+    "ddoc": "index-Repo",
+    "name": "index-Repo",
+    "type": "json"
+}

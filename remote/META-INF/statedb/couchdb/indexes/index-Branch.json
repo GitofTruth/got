@@ -1,0 +1,15 @@
+{
+    "index": {
+        "fields": [
+            "repoID",
+            "branchName",
+
+            "author",
+            "timestamp"
+        ]
+    },
+    "ddoc": "index-Branch",
+    "name": "index-Branch",
+    "type": "json"
+}
+

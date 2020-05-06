@@ -1,0 +1,38 @@
+//Do not forget the tableName
+
+
+Repo:
+	AddNewRepo (repoID , repoID - repoName - author -timestamp) [AddNewBranch ([])]
+
+
+Branch:
+	AddNewBranch (repoID - branchName , repoID- branchName - Author -Timestamp) [AddCommits([]), AddCommitParentHashes([])]
+
+	AddCommits 	(repoID - branchName - Hash , repoID - branchName - Hash - Message - Author - Committer - CommitterTimeStamp - Signature) []
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+queryRepo
+queryBranch
+
+queryRepoHashes
+queryCommits
+
+
+
+
+
+AddCollabrator

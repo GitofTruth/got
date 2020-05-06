@@ -1,0 +1,17 @@
+{
+    "index": {
+        "fields": [
+            "repoID",
+            "branchName",
+            "hash",
+
+            "message",
+            "author",
+            "committer",
+            "CommitterTimestamp"
+        ]
+    },
+    "ddoc": "index-BranchCommits",
+    "name": "index-BranchCommits",
+    "type": "json"
+}

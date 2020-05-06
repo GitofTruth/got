@@ -1,0 +1,13 @@
+{
+    "index": {
+        "fields": [
+            "tableName",
+            "repoID",
+
+            "hash"
+        ]
+    },
+    "ddoc": "index-RepoHashes",
+    "name": "index-RepoHashes",
+    "type": "json"
+}

@@ -1,0 +1,38 @@
+Repo
+	Name
+	Author
+	Timestamp
+->	CommitHashes
+->	Branches
+	
+	
+RepoBranch
+	Name
+	Author
+	Timestamp
+->	Logs
+	
+
+CommitLog
+	Message
+	Author
+	Committer
+	CommitterTimeStamp
+	Hash
+#	Signature
+->	ParentHashes
+
+	
+	
+
+	
+
+
+
+
+
+
+
+PushLog
+	BranchName
+	Logs
