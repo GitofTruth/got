@@ -1,7 +1,6 @@
 package datastructures
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 )
@@ -9,7 +8,7 @@ import (
 func TestRepo(t *testing.T) {
 	fmt.Println("Starting Test \t\t Repo")
 
-	x, _ := CreateNewRepo("GoT", "mickey", "DIRECOTRYCID" ,0, nil, nil, nil)
-	str, _ := json.Marshal(x)
-	fmt.Println(string(str))
+	// x, _ := CreateNewRepo("GoT", "mickey", "DIRECOTRYCID" ,0, nil, nil, nil)
+	// str, _ := json.Marshal(x)
+	// fmt.Println(string(str))
 }

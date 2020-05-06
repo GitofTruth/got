@@ -28,8 +28,6 @@ func UnmarashalUserUpdate(objectString string) (UserUpdate, error) {
 	return userUpdate, nil
 }
 
-
-
 // TODO: userName raceCase if userchange pupkey
 
 type UserInfo struct {

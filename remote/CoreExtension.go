@@ -5,6 +5,7 @@ import (
 	"github.com/GitofTruth/GoT/datastructures"
 
 	"strconv"
+	"time"
 
 	b64 "encoding/base64"
 	"fmt"
@@ -32,7 +33,14 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 	pair.key = string(repoHash)
 	accessLogs, _ := json.Marshal(repo.AccessLogs)
-	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name, "author": repo.Author, "directoryCID": repo.DirectoryCID, "timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": repo.EncryptionKey, "accessLogs": accessLogs}
+	encryptionKey, _ := json.Marshal(repo.EncryptionKey)
+	keyAnnouncements, _ := json.Marshal(repo.KeyAnnouncements)
+
+	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name,
+		"author": repo.Author, "directoryCID": repo.DirectoryCID,
+		"timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": encryptionKey,
+		"accessLogs": accessLogs, "keyAnnouncements": keyAnnouncements}
+
 	pair.value, _ = json.Marshal(value)
 
 	list = append(list, pair)
@@ -240,4 +248,11 @@ func GenerateRepoUserAccessesDBPair(stub shim.ChaincodeStubInterface, repo datas
 	}
 
 	return list, nil
+}
+
+func CheckCurrentTimeStamp(timeStamp int64) bool {
+	now := time.Now()
+	sec := now.Unix()
+
+	return ((sec - timeStamp) < 259200) && ((sec - timeStamp) > -86400)
 }

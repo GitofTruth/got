@@ -44,7 +44,10 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 	}
 	timestamp, _ := strconv.Atoi(structuredRepoData["timeStamp"])
 	users, _ := contract.getRepoUsers(stub, repoHash)
-	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], structuredRepoData["directoryCID"], timestamp, nil, structuredRepoData["encryptionKey"], users)
+	encryptionKey, _ := datastructures.UnmarashalKeyAnnouncement(structuredRepoData["encryptionKey"])
+	keyAnnouncements, _ := datastructures.UnmarashalKeyAnnouncements(structuredRepoData["keyAnnouncements"])
+	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], structuredRepoData["directoryCID"], timestamp, nil, encryptionKey, users)
+	repo.KeyAnnouncements = keyAnnouncements
 
 	// getting the repo branches
 	branchQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"branch\", \"repoID\": \"%s\"},\"fields\": [\"repoID\", \"branchName\", \"author\", \"timeStamp\"]}", repoHash)
@@ -107,7 +110,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			_ = json.Unmarshal([]byte(structuredCommitData["parentHashes"]), &ph)
 			var s []byte
 			_ = json.Unmarshal([]byte(structuredCommitData["signature"]), &s)
-			var enc interface{}
+			var enc string
 			_ = json.Unmarshal([]byte(structuredCommitData["encryptionKey"]), &enc)
 			var sh map[string]string
 			_ = json.Unmarshal([]byte(structuredCommitData["storageHashes"]), &sh)
@@ -145,49 +148,9 @@ func (contract *RepoContract) queryRepo(stub shim.ChaincodeStubInterface, args [
 }
 
 func (contract *RepoContract) clone(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	// repoAuthor, repoName
+	// repoAuthor, repoName, currentUserName
 
 	fmt.Println("Querying the ledger .. clone", args)
-
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2.")
-	}
-
-	repo, err := contract.getRepoInstance(stub, args)
-	if err != nil {
-		return shim.Error("Repo does not exist")
-	}
-
-	fmt.Println("Found this repo:", repo)
-
-	j, _ := json.Marshal(repo)
-	return shim.Success([]byte(string(j)))
-}
-
-func (contract *RepoContract) queryBranches(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	// repoAuthor, repoName
-
-	fmt.Println("Querying the ledger .. queryBranches", args)
-
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2.")
-	}
-
-	repo, err := contract.getRepoInstance(stub, args)
-	if err != nil {
-		return shim.Error("Repo does not exist")
-	}
-
-	fmt.Println("Found these branches:", repo.GetBranches())
-
-	j, _ := json.Marshal(repo.GetBranches())
-	return shim.Success([]byte(string(j)))
-}
-
-func (contract *RepoContract) queryBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	// repoAuthor, repoName, branchName
-
-	fmt.Println("Querying the ledger .. queryBranch", args)
 
 	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 3.")
@@ -198,22 +161,39 @@ func (contract *RepoContract) queryBranch(stub shim.ChaincodeStubInterface, args
 		return shim.Error("Repo does not exist")
 	}
 
-	if !repo.IsBranch(args[2]) {
-		fmt.Println("Requested Branch Not found")
-		return shim.Error("Requested Branch Not found")
-	}
+	repo.UpdateCommitsForUser(args[2])
 
-	branch := repo.Branches[args[2]]
-	fmt.Println("Found these branches:", branch)
+	fmt.Println("Found this repo:", repo)
 
-	seralized, _ := json.Marshal(branch)
-	return shim.Success([]byte(string(seralized)))
+	j, _ := json.Marshal(repo)
+	return shim.Success([]byte(string(j)))
 }
 
-func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	// repoAuthor, repoName, branchName, lastcommit
+func (contract *RepoContract) queryBranches(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName, currentUserName
 
-	fmt.Println("Querying the ledger .. queryBranchCommits", args)
+	fmt.Println("Querying the ledger .. queryBranches", args)
+
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3.")
+	}
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+	repo.UpdateCommitsForUser(args[2])
+
+	fmt.Println("Found these branches:", repo.GetBranches())
+
+	j, _ := json.Marshal(repo.GetBranches())
+	return shim.Success([]byte(string(j)))
+}
+
+func (contract *RepoContract) queryBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName, branchName, currentUserName
+
+	fmt.Println("Querying the ledger .. queryBranch", args)
 
 	if len(args) != 4 {
 		return shim.Error("Incorrect number of arguments. Expecting 4.")
@@ -228,6 +208,34 @@ func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterfac
 		fmt.Println("Requested Branch Not found")
 		return shim.Error("Requested Branch Not found")
 	}
+	repo.UpdateCommitsForUser(args[3])
+
+	branch := repo.Branches[args[2]]
+	fmt.Println("Found these branches:", branch)
+
+	seralized, _ := json.Marshal(branch)
+	return shim.Success([]byte(string(seralized)))
+}
+
+func (contract *RepoContract) queryBranchCommits(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	// repoAuthor, repoName, branchName, lastcommit, currentUserName
+
+	fmt.Println("Querying the ledger .. queryBranchCommits", args)
+
+	if len(args) != 5 {
+		return shim.Error("Incorrect number of arguments. Expecting 5.")
+	}
+
+	repo, err := contract.getRepoInstance(stub, args)
+	if err != nil {
+		return shim.Error("Repo does not exist")
+	}
+
+	if !repo.IsBranch(args[2]) {
+		fmt.Println("Requested Branch Not found")
+		return shim.Error("Requested Branch Not found")
+	}
+	repo.UpdateCommitsForUser(args[4])
 
 	branch := repo.Branches[args[2]]
 	fmt.Println("Found this branch:", branch)

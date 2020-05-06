@@ -24,7 +24,7 @@ func CreateNewClient(lastPush int) (Client, error) {
 		panic(err)
 	}
 	cli.Explorer = exp
-	cli.LocalRepo, _ = cli.Explorer.GetInternalRepo()
+	// cli.LocalRepo, _ = cli.Explorer.GetInternalRepo()
 
 	cli.LastPush = 0
 	return cli, nil
@@ -59,9 +59,9 @@ func (cli *Client) CreateBranchMessage(branch *datastructures.RepoBranch) (strin
 }
 
 func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (string, error) {
-	commit, _ := datastructures.CreateNewCommitLog("Testing the contract", "mickey", "mickey", 0, "COMMITHASH", nil, nil, nil, nil)
+	// commit, _ := datastructures.CreateNewCommitLog("Testing the contract", "mickey", "mickey", 0, "COMMITHASH", nil, nil, nil, nil)
 	pushes := make([]datastructures.CommitLog, 1)
-	pushes[0] = commit
+	// pushes[0] = commit
 	push, _ := datastructures.CreateNewPushLog("repo", "master", pushes)
 	pushasbytes, _ := json.Marshal(push)
 	argsStr, _ := json.Marshal(common.CreateNewArgsList("push", string(pushasbytes)))
@@ -71,14 +71,14 @@ func (cli *Client) CreateCommitLogMessage(branch *datastructures.RepoBranch) (st
 
 func (cli *Client) CreateAddNewRepoMessage() string {
 
-	x, _ := datastructures.CreateNewRepo("repo", "GoT", "hassan", 0, nil, nil, nil)
-	branch, _ := datastructures.CreateNewRepoBranch("master", "masterCreator", 1, nil)
-	x.AddBranch(branch)
-	commit, _ := datastructures.CreateNewCommitLog("message", "mickey", "mickeyAsCommiter", 3, "*************", nil, nil, nil, nil)
-	x.AddCommitLog(commit, "master")
-	str, _ := json.Marshal(x)
+	// x, _ := datastructures.CreateNewRepo("repo", "GoT", "hassan", 0, nil, nil, nil)
+	// branch, _ := datastructures.CreateNewRepoBranch("master", "masterCreator", 1, nil)
+	// x.AddBranch(branch)
+	// commit, _ := datastructures.CreateNewCommitLog("message", "mickey", "mickeyAsCommiter", 3, "*************", nil, nil, nil, nil)
+	// x.AddCommitLog(commit, "master")
+	// str, _ := json.Marshal(x)
 
-	argsStr, _ := json.Marshal(common.CreateNewArgsList("addNewRepo", string(str)))
+	argsStr, _ := json.Marshal(common.CreateNewArgsList("addNewRepo", string("str")))
 
 	return string(argsStr)
 }

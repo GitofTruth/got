@@ -44,11 +44,15 @@ func (branch *RepoBranch) IsCommitHash(hashName string) bool {
 //Checks if a log has at least one parent in the branch.
 func (branch *RepoBranch) ValidLog(commitLog CommitLog) (bool, error) {
 
-	return true, nil
 	if !branch.IsCommitHash(commitLog.Hash) {
+		if len(branch.Logs) == 0 {
+			return true, nil
+		}
+
 		for _, hash := range commitLog.Parenthashes {
 			if branch.IsCommitHash(hash) {
-				return true, nil
+				timeProgressing := branch.Logs[hash].CommitterTimestamp < commitLog.CommitterTimestamp
+				return timeProgressing, nil
 			}
 		}
 	}

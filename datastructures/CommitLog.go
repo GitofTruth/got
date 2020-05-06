@@ -8,11 +8,11 @@ type CommitLog struct {
 	Hash               string            `json:"hash"`
 	Parenthashes       []string          `json:"parentHashes"`
 	Signature          []byte            `json:"signature"`
-	EncryptionKey      interface{}       `json:"encryptionKey"`
+	EncryptionKey      string            `json:"encryptionKey"`
 	StorageHashes      map[string]string `json:"storageHashes"`
 }
 
-func CreateNewCommitLog(message string, author string, commiter string, timestamp int, hash string, parenthashes []string, signature []byte, encryptionKey interface{}, storageHashes map[string]string) (CommitLog, error) {
+func CreateNewCommitLog(message string, author string, commiter string, timestamp int, hash string, parenthashes []string, signature []byte, encryptionKey string, storageHashes map[string]string) (CommitLog, error) {
 	var log CommitLog
 
 	log.Message = message

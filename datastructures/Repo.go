@@ -21,6 +21,23 @@ type AccessLog struct {
 	UserAccess `json:"userAccess"`
 }
 
+type KeyAnnouncement struct {
+	KeyHash       string            `json:"KeyHash"`
+	EncryptedKeys map[string]string `json:"encryptedKeys"`
+}
+
+func UnmarashalKeyAnnouncements(objectString string) (map[string]KeyAnnouncement, error) {
+	var keyAnnouncements map[string]KeyAnnouncement
+	json.Unmarshal([]byte(objectString), &keyAnnouncements)
+	return keyAnnouncements, nil
+}
+
+func UnmarashalKeyAnnouncement(objectString string) (KeyAnnouncement, error) {
+	var keyAnnouncement KeyAnnouncement
+	json.Unmarshal([]byte(objectString), &keyAnnouncement)
+	return keyAnnouncement, nil
+}
+
 // TODO: should we check for mutex or the hyperledger handles this???
 // TODO: now handle the 	EncryptionKey interface{}, Users map[string]UserAccessAccessLogs, []AccessLog	into Coachdb
 
@@ -33,9 +50,10 @@ type Repo struct {
 	CommitHashes map[string]struct{}   `json:"hashes"`
 	Branches     map[string]RepoBranch `json:"branches"`
 
-	EncryptionKey interface{}           `json:"encryptionKey"`
-	Users         map[string]UserAccess `json:"users"`
-	AccessLogs    []AccessLog           `json:"accessLogs"`
+	EncryptionKey    KeyAnnouncement            `json:"encryptionKey"`
+	Users            map[string]UserAccess      `json:"users"`
+	AccessLogs       []AccessLog                `json:"accessLogs"`
+	KeyAnnouncements map[string]KeyAnnouncement `json:"keyAnnouncements"`
 }
 
 func (repo *Repo) GetUserAccess(userName string) UserAccess {
@@ -86,7 +104,7 @@ func (repo *Repo) ValidUpdateAccess(authorized string, userAccess UserAccess, au
 	return false
 }
 
-func (repo *Repo) UpdateAccess(authorized string, userAccess UserAccess, authorizer string, encryptionKey interface{}) bool {
+func (repo *Repo) UpdateAccess(authorized string, userAccess UserAccess, authorizer string, keyAnnouncement KeyAnnouncement) bool {
 
 	if repo.ValidUpdateAccess(authorized, userAccess, authorizer) {
 		if val, exist := repo.Users[authorized]; exist {
@@ -104,8 +122,9 @@ func (repo *Repo) UpdateAccess(authorized string, userAccess UserAccess, authori
 		repo.AccessLogs = append(repo.AccessLogs, accessLog)
 		repo.Users[authorized] = userAccess
 
-		if encryptionKey != nil {
-			repo.EncryptionKey = encryptionKey
+		if keyAnnouncement.KeyHash != "" {
+			repo.EncryptionKey = keyAnnouncement
+			repo.KeyAnnouncements[keyAnnouncement.KeyHash] = keyAnnouncement
 		}
 
 		return true
@@ -114,7 +133,7 @@ func (repo *Repo) UpdateAccess(authorized string, userAccess UserAccess, authori
 	return false
 }
 
-func CreateNewRepo(name string, author string, directoryCID string, timestamp int, branches map[string]RepoBranch, encryptionKey interface{}, users map[string]UserAccess) (Repo, error) {
+func CreateNewRepo(name string, author string, directoryCID string, timestamp int, branches map[string]RepoBranch, encryptionKey KeyAnnouncement, users map[string]UserAccess) (Repo, error) {
 	var repo Repo
 
 	repo.Name = name
@@ -132,8 +151,8 @@ func CreateNewRepo(name string, author string, directoryCID string, timestamp in
 	}
 
 	// the first commit
-	var empty struct{}
-	repo.CommitHashes["0000000000000000000000000000000000000000"] = empty
+	// var empty struct{}
+	// repo.CommitHashes["0000000000000000000000000000000000000000"] = empty
 	//check what is built on this hash
 
 	if branches == nil {
@@ -203,10 +222,11 @@ func (repo *Repo) GetBranches() []string {
 //checks that all hash parents are hashes
 func (repo *Repo) ValidCommitLog(commitLog CommitLog, branchName string) (bool, error) {
 
-	return true, nil
-
 	if repo.IsBranch(branchName) {
 		branch := repo.Branches[branchName]
+		if len(repo.CommitHashes) == 0 {
+			return true, nil
+		}
 		if valid, _ := branch.ValidLog(commitLog); valid {
 
 			allParentsAreHashes := true
@@ -297,7 +317,6 @@ func (repo *Repo) AddCommitLog(commitLog CommitLog, branchName string) (bool, er
 
 //What if not all the commits were added? rolling back?
 func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string) (bool, error) {
-	return true, nil
 
 	if valid, _ := repo.ValidCommitLogs(commitLogs, branchName); valid {
 
@@ -313,6 +332,7 @@ func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string) (bool
 		if fullDone {
 			repo.Branches[branchName] = branch
 			repo.AddCommitHashes(commitLogs)
+			return true, nil
 		}
 	}
 
@@ -334,4 +354,16 @@ func (repo *Repo) AddBranch(branch RepoBranch) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (repo *Repo) UpdateCommitsForUser(userName string) bool {
+	for branchName := range repo.Branches {
+		for commitHash := range repo.Branches[branchName].Logs {
+			keyHash := repo.Branches[branchName].Logs[commitHash].EncryptionKey
+			log := repo.Branches[branchName].Logs[commitHash]
+			log.EncryptionKey = repo.KeyAnnouncements[keyHash].EncryptedKeys[userName]
+			repo.Branches[branchName].Logs[commitHash] = log
+		}
+	}
+	return true
 }
