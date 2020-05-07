@@ -47,6 +47,9 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 	encryptionKey, _ := datastructures.UnmarashalKeyAnnouncement(structuredRepoData["encryptionKey"])
 	keyAnnouncements, _ := datastructures.UnmarashalKeyAnnouncements(structuredRepoData["keyAnnouncements"])
 	repo, _ := datastructures.CreateNewRepo(structuredRepoData["repoName"], structuredRepoData["author"], structuredRepoData["directoryCID"], timestamp, nil, encryptionKey, users)
+	// fmt.Println("Bos hen keda\n\n")
+	// fmt.Println(structuredRepoData["keyAnnouncements"])
+	// fmt.Println(repo.KeyAnnouncements)
 	repo.KeyAnnouncements = keyAnnouncements
 
 	// getting the repo branches
@@ -80,7 +83,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 		repo.AddBranch(branch)
 
 		//adding branch commits
-		commitsQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"commit\", \"repoID\": \"%s\", \"branchName\": \"%s\"},\"fields\": [\"repoID\", \"branchName\",\"hash\", \"message\", \"author\", \"committer\", \"committerTimestamp\", \"CommitParenthashes\", \"signature\", \"storageHashes\"]}", repoHash, branch.Name)
+		commitsQueryString := fmt.Sprintf("{\"selector\": {\"docName\": \"commit\", \"repoID\": \"%s\", \"branchName\": \"%s\"},\"fields\": [\"repoID\", \"branchName\",\"hash\", \"message\", \"author\", \"committer\", \"committerTimestamp\", \"CommitParenthashes\", \"signature\", \"storageHashes\", \"encryptionKey\"]}", repoHash, branch.Name)
 		commitsResultsIterator, err := stub.GetQueryResult(commitsQueryString)
 		if err != nil {
 			var repo datastructures.Repo
@@ -110,11 +113,12 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			_ = json.Unmarshal([]byte(structuredCommitData["parentHashes"]), &ph)
 			var s []byte
 			_ = json.Unmarshal([]byte(structuredCommitData["signature"]), &s)
-			var enc string
-			_ = json.Unmarshal([]byte(structuredCommitData["encryptionKey"]), &enc)
+			// var enc string
+			// _ = json.Unmarshal([]byte(structuredCommitData["encryptionKey"]), &enc)
 			var sh map[string]string
 			_ = json.Unmarshal([]byte(structuredCommitData["storageHashes"]), &sh)
-			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s, enc, sh)
+			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s, structuredCommitData["encryptionKey"], sh)
+			fmt.Println("and the comit became \t", commit)
 			repo.AddCommitLog(commit, branch.Name, true)
 		}
 	}

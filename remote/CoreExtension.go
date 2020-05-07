@@ -36,10 +36,17 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 	encryptionKey, _ := json.Marshal(repo.EncryptionKey)
 	keyAnnouncements, _ := json.Marshal(repo.KeyAnnouncements)
 
+	// fmt.Println("\n\nbos el awal hena")
+	// fmt.Println(repo.KeyAnnouncements)
+	// fmt.Println(keyAnnouncements)
+	keyAnnouncementsss, _ := datastructures.UnmarashalKeyAnnouncements(string(keyAnnouncements))
+	// fmt.Println(keyAnnouncementsss)
+	fmt.Println("Kefaya bas y ostaz\n\n")
+
 	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name,
 		"author": repo.Author, "directoryCID": repo.DirectoryCID,
-		"timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": encryptionKey,
-		"accessLogs": accessLogs, "keyAnnouncements": keyAnnouncements}
+		"timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": string(encryptionKey),
+		"accessLogs": string(accessLogs), "keyAnnouncements": string(keyAnnouncements)}
 
 	pair.value, _ = json.Marshal(value)
 

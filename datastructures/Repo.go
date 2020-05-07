@@ -23,7 +23,7 @@ type AccessLog struct {
 }
 
 type KeyAnnouncement struct {
-	KeyHash       string            `json:"KeyHash"`
+	KeyHash       string            `json:"keyHash"`
 	EncryptedKeys map[string]string `json:"encryptedKeys"`
 }
 
@@ -376,6 +376,7 @@ func (repo *Repo) AddBranch(branch RepoBranch) (bool, error) {
 }
 
 func (repo *Repo) UpdateCommitsForUser(userName string) bool {
+	// fmt.Println("\n\nBefore Update:", repo)
 	for branchName := range repo.Branches {
 		for commitHash := range repo.Branches[branchName].Logs {
 			keyHash := repo.Branches[branchName].Logs[commitHash].EncryptionKey
@@ -384,5 +385,6 @@ func (repo *Repo) UpdateCommitsForUser(userName string) bool {
 			repo.Branches[branchName].Logs[commitHash] = log
 		}
 	}
+	// fmt.Println("\n\nAfter Update:", repo)
 	return true
 }
