@@ -115,7 +115,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 			var sh map[string]string
 			_ = json.Unmarshal([]byte(structuredCommitData["storageHashes"]), &sh)
 			commit, _ := datastructures.CreateNewCommitLog(structuredCommitData["message"], structuredCommitData["author"], structuredCommitData["commiter"], committerTimestamp, structuredCommitData["hash"], ph, s, enc, sh)
-			repo.AddCommitLog(commit, branch.Name)
+			repo.AddCommitLog(commit, branch.Name, true)
 		}
 	}
 

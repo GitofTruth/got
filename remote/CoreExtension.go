@@ -106,7 +106,6 @@ func GenerateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo da
 	list := make([]LedgerPair, 0)
 	for _, branch := range repo.Branches {
 		for _, log := range branch.Logs {
-
 			pair, _ := GenerateRepoBranchCommitDBPair(stub, repo.Author, repo.Name, branch.Name, log)
 			list = append(list, pair)
 		}
@@ -147,7 +146,7 @@ func GetRepoKey(author string, repoName string) string {
 	repoHash := sha256.New()
 	repoHash.Write(js)
 
-	fmt.Println("Repo Hash: ", repoHash.Sum(nil))
+	// fmt.Println("Repo Hash: ", repoHash.Sum(nil))
 	sEnc := b64.StdEncoding.EncodeToString([]byte(repoHash.Sum(nil)))
 	fmt.Println("Repo Hash: ", sEnc)
 

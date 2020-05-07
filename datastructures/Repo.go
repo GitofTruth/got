@@ -3,6 +3,7 @@ package datastructures
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 )
 
 type UserAccess int
@@ -179,6 +180,7 @@ func UnmarashalRepo(objectString string) (Repo, error) {
 	// TODO: check number of owenrs for first creation in the contract
 
 	repo, _ := CreateNewRepo(unmarashaledRepo.Name, unmarashaledRepo.Author, unmarashaledRepo.DirectoryCID, unmarashaledRepo.Timestamp, nil, unmarashaledRepo.EncryptionKey, unmarashaledRepo.Users)
+	repo.KeyAnnouncements = unmarashaledRepo.KeyAnnouncements
 
 	// var repo Repo
 
@@ -189,12 +191,29 @@ func UnmarashalRepo(objectString string) (Repo, error) {
 	// repo.CommitHashes = make(map[string]struct{})
 	// repo.Branches = make(map[string]RepoBranch)
 
+	// TODO: now you need to initialize a repoBranch with its master first
 	for _, branch := range unmarashaledRepo.Branches {
 		newBranch, _ := CreateNewRepoBranch(branch.Name, branch.Author, branch.Timestamp, nil)
 		repo.AddBranch(newBranch)
-		for _, log := range branch.Logs {
-			repo.AddCommitLog(log, branch.Name)
+
+		logsList := make([]CommitLog, 0, len(branch.Logs))
+
+		for _, v := range branch.Logs {
+			logsList = append(logsList, v)
 		}
+
+		// sort the logs with time ascending
+		sort.Slice(logsList, func(i, j int) bool {
+			return logsList[i].CommitterTimestamp > logsList[j].CommitterTimestamp
+		})
+
+		for i := len(logsList) - 1; i >= 0; i-- {
+			repo.AddCommitLog(logsList[i], branch.Name, false)
+		}
+
+		// for _, log := range branch.Logs {
+		// 	repo.AddCommitLog(log, branch.Name)
+		// }
 	}
 
 	return repo, nil
@@ -299,12 +318,12 @@ func (repo *Repo) AddCommitHashes(commitLogs []CommitLog) bool {
 	return true
 }
 
-func (repo *Repo) AddCommitLog(commitLog CommitLog, branchName string) (bool, error) {
+func (repo *Repo) AddCommitLog(commitLog CommitLog, branchName string, passValidation bool) (bool, error) {
 
-	if valid, _ := repo.ValidCommitLog(commitLog, branchName); valid {
+	if valid, _ := repo.ValidCommitLog(commitLog, branchName); valid || passValidation {
 
 		branch := repo.Branches[branchName]
-		if done, _ := branch.AddCommitLog(commitLog); done {
+		if done, _ := branch.AddCommitLog(commitLog, passValidation); done {
 			repo.Branches[branchName] = branch
 			repo.AddCommitHash(commitLog)
 			return true, nil
@@ -316,14 +335,14 @@ func (repo *Repo) AddCommitLog(commitLog CommitLog, branchName string) (bool, er
 }
 
 //What if not all the commits were added? rolling back?
-func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string) (bool, error) {
+func (repo *Repo) AddCommitLogs(commitLogs []CommitLog, branchName string, passValidation bool) (bool, error) {
 
-	if valid, _ := repo.ValidCommitLogs(commitLogs, branchName); valid {
+	if valid, _ := repo.ValidCommitLogs(commitLogs, branchName); valid || passValidation {
 
 		branch := repo.Branches[branchName]
 		fullDone := true
 		for _, commitLog := range commitLogs {
-			if done, _ := branch.AddCommitLog(commitLog); !done {
+			if done, _ := branch.AddCommitLog(commitLog, passValidation); !done {
 				fullDone = false
 				break
 			}

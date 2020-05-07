@@ -49,6 +49,7 @@ func (contract *RepoContract) validateUserArgsMessage(stub shim.ChaincodeStubInt
 		var innerArgs []string
 		return userMessage, innerArgs, errors.New("innerArgs is invalid!")
 	}
+
 	if len(innerArgs) != argsNumber {
 		var userMessage client.UserMessage
 		var innerArgs []string
@@ -191,7 +192,7 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 		branchDidNotExist, _ = repo.AddBranch(newbranch)
 	}
 
-	valid, err := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName)
+	valid, err := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName, false)
 	if err != nil || !valid {
 		return shim.Error("Logs could not be added!")
 	}
