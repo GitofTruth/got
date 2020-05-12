@@ -61,9 +61,9 @@ func (branch *RepoBranch) ValidLog(commitLog CommitLog) (bool, error) {
 }
 
 //Adds a CommitLog to the branch if it can be added according to the info avaiable to the branch.
-func (branch *RepoBranch) AddCommitLog(commitLog CommitLog) (bool, error) {
+func (branch *RepoBranch) AddCommitLog(commitLog CommitLog, passValidation bool) (bool, error) {
 
-	if valid, _ := branch.ValidLog(commitLog); valid {
+	if valid, _ := branch.ValidLog(commitLog); valid || passValidation {
 		branch.Logs[commitLog.Hash] = commitLog
 		return true, nil
 	}

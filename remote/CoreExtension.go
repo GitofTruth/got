@@ -36,10 +36,17 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 	encryptionKey, _ := json.Marshal(repo.EncryptionKey)
 	keyAnnouncements, _ := json.Marshal(repo.KeyAnnouncements)
 
+	// fmt.Println("\n\nbos el awal hena")
+	// fmt.Println(repo.KeyAnnouncements)
+	// fmt.Println(keyAnnouncements)
+	// keyAnnouncementsss, _ := datastructures.UnmarashalKeyAnnouncements(string(keyAnnouncements))
+	// fmt.Println(keyAnnouncementsss)
+	// fmt.Println("Kefaya bas y ostaz\n\n")
+
 	value := map[string]interface{}{"docName": "repo", "repoID": repoHash, "repoName": repo.Name,
 		"author": repo.Author, "directoryCID": repo.DirectoryCID,
-		"timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": encryptionKey,
-		"accessLogs": accessLogs, "keyAnnouncements": keyAnnouncements}
+		"timeStamp": strconv.Itoa(repo.Timestamp), "encryptionKey": string(encryptionKey),
+		"accessLogs": string(accessLogs), "keyAnnouncements": string(keyAnnouncements)}
 
 	pair.value, _ = json.Marshal(value)
 
@@ -106,7 +113,6 @@ func GenerateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo da
 	list := make([]LedgerPair, 0)
 	for _, branch := range repo.Branches {
 		for _, log := range branch.Logs {
-
 			pair, _ := GenerateRepoBranchCommitDBPair(stub, repo.Author, repo.Name, branch.Name, log)
 			list = append(list, pair)
 		}
@@ -147,7 +153,7 @@ func GetRepoKey(author string, repoName string) string {
 	repoHash := sha256.New()
 	repoHash.Write(js)
 
-	fmt.Println("Repo Hash: ", repoHash.Sum(nil))
+	// fmt.Println("Repo Hash: ", repoHash.Sum(nil))
 	sEnc := b64.StdEncoding.EncodeToString([]byte(repoHash.Sum(nil)))
 	fmt.Println("Repo Hash: ", sEnc)
 

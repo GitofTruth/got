@@ -49,6 +49,7 @@ func (contract *RepoContract) validateUserArgsMessage(stub shim.ChaincodeStubInt
 		var innerArgs []string
 		return userMessage, innerArgs, errors.New("innerArgs is invalid!")
 	}
+
 	if len(innerArgs) != argsNumber {
 		var userMessage client.UserMessage
 		var innerArgs []string
@@ -112,7 +113,7 @@ func (contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface, args 
 	branchCommitPairs, _ := GenerateRepoBranchesCommitsDBPair(stub, repo)
 	applyPairs(stub, branchCommitPairs)
 
-	return shim.Success(nil)
+	return shim.Success([]byte("The repo has been added successfully to the blockchain."))
 }
 
 func (contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -152,7 +153,7 @@ func (contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, arg
 	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingBranch(stub, innerArgs[0], innerArgs[1], repoBranch)
 	applyPairs(stub, commitsPairs)
 
-	return shim.Success(nil)
+	return shim.Success([]byte("The branch has been added successfully to its corresponding repo!"))
 }
 
 func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -191,7 +192,7 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 		branchDidNotExist, _ = repo.AddBranch(newbranch)
 	}
 
-	valid, err := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName)
+	valid, err := repo.AddCommitLogs(pushLog.Logs, pushLog.BranchName, false)
 	if err != nil || !valid {
 		return shim.Error("Logs could not be added!")
 	}
@@ -207,7 +208,7 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(stub, innerArgs[0], innerArgs[1], pushLog)
 	applyPairs(stub, commitsPairs)
 
-	return shim.Success(nil)
+	return shim.Success([]byte("The commits have been added successfully to the blockchain"))
 }
 
 func (contract *RepoContract) addUserUpdate(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -246,7 +247,7 @@ func (contract *RepoContract) addUserUpdate(stub shim.ChaincodeStubInterface, ar
 		applyPairs(stub, pairs)
 	}
 
-	return shim.Success(nil)
+	return shim.Success([]byte("The requested user update has been processed successfully!"))
 }
 
 func (contract *RepoContract) updateRepoUserAccess(stub shim.ChaincodeStubInterface, args []string) peer.Response {
@@ -279,10 +280,10 @@ func (contract *RepoContract) updateRepoUserAccess(stub shim.ChaincodeStubInterf
 		pair, _ := GenerateRepoUserAccessDBPair(stub, innerArgs[0], innerArgs[1], innerArgs[2], innerArgs[3], innerArgs[4])
 		applyPair(stub, pair)
 
-		return shim.Success(nil)
+		return shim.Success([]byte("Access to the repo has been updated successfully!"))
 	}
 
-	return shim.Error("UserAccess was not set!")
+	return shim.Error("UserAccess was not set! Your access type does not permit you to do the required task")
 }
 
 // func(contract *RepoContract) NewSetterFunction(stub shim.ChaincodeStubInterface, args []string) peer.Response {
