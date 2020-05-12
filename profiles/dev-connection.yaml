@@ -67,7 +67,7 @@ channels:
 #
 orderers:
   orderer.acme.com:
-    url: grpc://localhost:7050
+    url: grpc://13.95.171.119:7050
 
     # these are standard properties defined by the gRPC library
     # they will be passed in as-is to gRPC client constructor
@@ -85,7 +85,7 @@ orderers:
 peers:
   acme-peer1.acme.com:
 
-    url: grpc://127.0.0.1:7051
+    url: grpc://13.95.171.119:7051
 
     # grpcOptions:
     #   ssl-target-name-override: peer0.acme.com
@@ -95,7 +95,7 @@ peers:
 
   budget-peer1.budget.com:
 
-    url: grpc://localhost:8051
+    url: grpc://13.95.171.119:8051
 
     # grpcOptions:
     #   ssl-target-name-override: budget-peer1.budget.com
