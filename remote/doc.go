@@ -1,7 +1,3 @@
-
-
-
-
 // This go package creates a hyperledger contract class for managing the different
 // features of GoT. GoT stores data about the different repositories hashes and
 // repository access control through this contract.

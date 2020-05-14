@@ -1,5 +1,12 @@
 package datastructures
 
+// This structure is modeling the necessary data to be stored for each commit
+// including data nomrally stored through git and data required to get the git
+// objects through the GoT IPFS Cluster.
+// The EncryptionKey stored inside this object represents the hash of the symmetric
+// encryption key used to encrypt the git objects. However, when a query is done
+// in the block chain, this field is filled with the encrypted form of the EncryptionKey
+// instead of its hash.
 type CommitLog struct {
 	Message            string            `json:"message"`
 	Author             string            `json:"author"`
@@ -12,6 +19,7 @@ type CommitLog struct {
 	StorageHashes      map[string]string `json:"storageHashes"`
 }
 
+// this is a helper function to initialize a new CommitLog object instance
 func CreateNewCommitLog(message string, author string, commiter string, timestamp int, hash string, parenthashes []string, signature []byte, encryptionKey string, storageHashes map[string]string) (CommitLog, error) {
 	var log CommitLog
 

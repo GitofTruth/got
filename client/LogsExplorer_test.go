@@ -1,4 +1,4 @@
-package datastructures
+package client
 
 import (
 	"fmt"

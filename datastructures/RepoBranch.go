@@ -24,6 +24,9 @@ func CreateNewRepoBranch(name string, author string, timestamp int, logs map[str
 	return repoBranch, nil
 }
 
+// This function takes a json string that represents the marshalling of RepoBranch
+// and returns a RepoBranch.
+// The returned data is valid and consistent
 func UnmarashalRepoBranch(objectString string) (RepoBranch, error) {
 	var repoBranch RepoBranch
 

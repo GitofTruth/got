@@ -13,13 +13,13 @@ type Client struct {
 	LastPush   int
 	LocalRepo  datastructures.Repo
 	RemoteRepo datastructures.Repo
-	Explorer   datastructures.LogsExplorer
+	Explorer   LogsExplorer
 }
 
 func CreateNewClient(lastPush int) (Client, error) {
 	var cli Client
 
-	exp, err := datastructures.CreateNewLogsExplorer("")
+	exp, err := CreateNewLogsExplorer("")
 	if err != nil {
 		panic(err)
 	}
