@@ -1,12 +1,12 @@
-package main
+package remote
 
 import (
 	"errors"
 	"fmt"
 	"strconv"
 
-	client "github.com/GitofTruth/GoT/client"
-	"github.com/GitofTruth/GoT/datastructures"
+	client "github.com/GitofTruth/got/client"
+	"github.com/GitofTruth/got/datastructures"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"

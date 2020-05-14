@@ -1,8 +1,8 @@
-package main
+package remote
 
 import (
-	client "github.com/GitofTruth/GoT/client"
-	"github.com/GitofTruth/GoT/datastructures"
+	client "github.com/GitofTruth/got/client"
+	"github.com/GitofTruth/got/datastructures"
 
 	"strconv"
 	"time"

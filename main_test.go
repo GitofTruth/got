@@ -1,11 +1,11 @@
-package main
+package got
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
-	"github.com/GitofTruth/GoT/client"
+	"github.com/GitofTruth/got/client"
 )
 
 func TestBasicgroup(t *testing.T) {

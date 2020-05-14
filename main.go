@@ -1,10 +1,10 @@
-package main
+package got
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/GitofTruth/GoT/client"
+	"github.com/GitofTruth/got/client"
 )
 
 func main() {

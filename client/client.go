@@ -3,8 +3,8 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/GitofTruth/GoT/common"
-	"github.com/GitofTruth/GoT/datastructures"
+	"github.com/GitofTruth/got/common"
+	"github.com/GitofTruth/got/datastructures"
 )
 
 // should get info about current user, connect to send transactions to a contract and send transactions accordingly
