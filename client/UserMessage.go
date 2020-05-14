@@ -8,12 +8,14 @@ type ArgsContent struct {
 	Args []string `json:"args"`
 }
 
+// contains the enough data to generate a signature.
 type SignedData struct {
 	Content       string `json:"content"`
 	MessageNumber int    `json:"messageNumber"`
 	UserName      string `json:"userName"`
 }
 
+// models the expected form of any data received in the blockchain contract.
 type UserMessage struct {
 	SignedData `json:"signedData"`
 

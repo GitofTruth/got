@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// This enum identifies the differnt user update request types.
 type UserUpdateType int
 
 const (
@@ -30,12 +31,14 @@ func UnmarashalUserUpdate(objectString string) (UserUpdate, error) {
 
 // TODO: userName raceCase if userchange pupkey
 
+// contains all the public avaiable information about a user
 type UserInfo struct {
 	UserName          string      `json:"userName"`
 	PublicKey         interface{} `json:"publicKey"`
 	LastMessageNumber int         `json:"lastMessageNumber"`
 }
 
+// contains all the avaiable information about a user
 type User struct {
 	UserInfo   `json:"userInfo"`
 	PrivateKey interface{} `json:"privateKey"`
