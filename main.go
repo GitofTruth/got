@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GitofTruth/GoT/client-go"
+	"github.com/GitofTruth/GoT/client"
 )
 
 func main() {
