@@ -7,14 +7,20 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 )
 
+// this struct is the wrapper for the different possible functionalities for managing data in the blockchain.
 type RepoContract struct {
 }
 
+// this function is required by the hyperledger API
+// it is called on a new contract initializion
 func (contract *RepoContract) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	fmt.Println("initializing ledger")
 	return shim.Success(nil)
 }
 
+
+// this function is responsible for the various possible calling for this Contract
+// whether this calling is an invokation or query
 func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 	function, args := stub.GetFunctionAndParameters()
