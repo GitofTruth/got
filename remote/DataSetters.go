@@ -101,16 +101,16 @@ func (contract *RepoContract) addNewRepo(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("Repo already exists")
 	}
 
-	repoPairs, _ := GenerateRepoDBPair(stub, repo)
+	repoPairs, _ := generateRepoDBPair(stub, repo)
 	applyPairs(stub, repoPairs)
 
-	accessPairs, _ := GenerateRepoUserAccessesDBPair(stub, repo)
+	accessPairs, _ := generateRepoUserAccessesDBPair(stub, repo)
 	applyPairs(stub, accessPairs)
 
-	branchPairs, _ := GenerateRepoBranchesDBPair(stub, repo)
+	branchPairs, _ := generateRepoBranchesDBPair(stub, repo)
 	applyPairs(stub, branchPairs)
 
-	branchCommitPairs, _ := GenerateRepoBranchesCommitsDBPair(stub, repo)
+	branchCommitPairs, _ := generateRepoBranchesCommitsDBPair(stub, repo)
 	applyPairs(stub, branchCommitPairs)
 
 	return shim.Success([]byte("The repo has been added successfully to the blockchain."))
@@ -147,10 +147,10 @@ func (contract *RepoContract) addNewBranch(stub shim.ChaincodeStubInterface, arg
 		return shim.Error("RepoBranch could not be added!")
 	}
 
-	branchPair, _ := GenerateRepoBranchDBPair(stub, innerArgs[0], innerArgs[1], repoBranch)
+	branchPair, _ := generateRepoBranchDBPair(stub, innerArgs[0], innerArgs[1], repoBranch)
 	applyPair(stub, branchPair)
 
-	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingBranch(stub, innerArgs[0], innerArgs[1], repoBranch)
+	commitsPairs, _ := generateRepoBranchesCommitsDBPairUsingBranch(stub, innerArgs[0], innerArgs[1], repoBranch)
 	applyPairs(stub, commitsPairs)
 
 	return shim.Success([]byte("The branch has been added successfully to its corresponding repo!"))
@@ -197,15 +197,15 @@ func (contract *RepoContract) addCommits(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("Logs could not be added!")
 	}
 
-	repoPairs, _ := GenerateRepoDBPair(stub, repo)
+	repoPairs, _ := generateRepoDBPair(stub, repo)
 	applyPairs(stub, repoPairs)
 
 	if branchDidNotExist {
-		branchPair, _ := GenerateRepoBranchDBPair(stub, innerArgs[0], innerArgs[1], repo.Branches[pushLog.BranchName])
+		branchPair, _ := generateRepoBranchDBPair(stub, innerArgs[0], innerArgs[1], repo.Branches[pushLog.BranchName])
 		applyPair(stub, branchPair)
 	}
 
-	commitsPairs, _ := GenerateRepoBranchesCommitsDBPairUsingPushLog(stub, innerArgs[0], innerArgs[1], pushLog)
+	commitsPairs, _ := generateRepoBranchesCommitsDBPairUsingPushLog(stub, innerArgs[0], innerArgs[1], pushLog)
 	applyPairs(stub, commitsPairs)
 
 	return shim.Success([]byte("The commits have been added successfully to the blockchain"))
@@ -243,7 +243,7 @@ func (contract *RepoContract) addUserUpdate(stub shim.ChaincodeStubInterface, ar
 	userNameMatchingChange := (userMessage.UserName == userUpdate.OldUserName) && (userUpdate.UserUpdateType == client.ChangeUserUserName)
 	userNameMatching := userNameMatchingNoChange || userNameMatchingChange
 	if userMessage.VerifySignature(pubKey) && userNameMatching {
-		pairs, _ := GenerateUserUpdateDBPairs(stub, userUpdate)
+		pairs, _ := generateUserUpdateDBPairs(stub, userUpdate)
 		applyPairs(stub, pairs)
 	}
 
@@ -275,9 +275,9 @@ func (contract *RepoContract) updateRepoUserAccess(stub shim.ChaincodeStubInterf
 
 	retrievedEncKey, _ := datastructures.UnmarashalKeyAnnouncement(innerArgs[5])
 	if repo.UpdateAccess(innerArgs[2], datastructures.UserAccess(access), innerArgs[4], retrievedEncKey) {
-		repoPairs, _ := GenerateRepoDBPair(stub, repo)
+		repoPairs, _ := generateRepoDBPair(stub, repo)
 		applyPairs(stub, repoPairs)
-		pair, _ := GenerateRepoUserAccessDBPair(stub, innerArgs[0], innerArgs[1], innerArgs[2], innerArgs[3], innerArgs[4])
+		pair, _ := generateRepoUserAccessDBPair(stub, innerArgs[0], innerArgs[1], innerArgs[2], innerArgs[3], innerArgs[4])
 		applyPair(stub, pair)
 
 		return shim.Success([]byte("Access to the repo has been updated successfully!"))

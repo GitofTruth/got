@@ -18,7 +18,6 @@ func (contract *RepoContract) Init(stub shim.ChaincodeStubInterface) peer.Respon
 	return shim.Success(nil)
 }
 
-
 // this function is responsible for the various possible calling for this Contract
 // whether this calling is an invokation or query
 func (contract *RepoContract) Invoke(stub shim.ChaincodeStubInterface) peer.Response {

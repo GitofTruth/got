@@ -21,7 +21,7 @@ type LedgerPair struct {
 	value []byte
 }
 
-func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
+func generateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
 
 	repoHash := GetRepoKey(repo.Author, repo.Name)
 
@@ -55,7 +55,7 @@ func GenerateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 	return list, nil
 }
 
-func GenerateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, branch datastructures.RepoBranch) (LedgerPair, error) {
+func generateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, branch datastructures.RepoBranch) (LedgerPair, error) {
 
 	repoHash := GetRepoKey(author, repoName)
 
@@ -76,19 +76,19 @@ func GenerateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, r
 	return pair, nil
 }
 
-func GenerateRepoBranchesDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
+func generateRepoBranchesDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 
 	for _, branch := range repo.Branches {
-		pair, _ := GenerateRepoBranchDBPair(stub, repo.Author, repo.Name, branch)
+		pair, _ := generateRepoBranchDBPair(stub, repo.Author, repo.Name, branch)
 		list = append(list, pair)
 	}
 
 	return list, nil
 }
 
-func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, branchName string, commitLog datastructures.CommitLog) (LedgerPair, error) {
+func generateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, branchName string, commitLog datastructures.CommitLog) (LedgerPair, error) {
 
 	repoHash := GetRepoKey(author, repoName)
 
@@ -108,12 +108,12 @@ func GenerateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author str
 	return pair, nil
 }
 
-func GenerateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
+func generateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 	for _, branch := range repo.Branches {
 		for _, log := range branch.Logs {
-			pair, _ := GenerateRepoBranchCommitDBPair(stub, repo.Author, repo.Name, branch.Name, log)
+			pair, _ := generateRepoBranchCommitDBPair(stub, repo.Author, repo.Name, branch.Name, log)
 			list = append(list, pair)
 		}
 	}
@@ -121,24 +121,24 @@ func GenerateRepoBranchesCommitsDBPair(stub shim.ChaincodeStubInterface, repo da
 	return list, nil
 }
 
-func GenerateRepoBranchesCommitsDBPairUsingBranch(stub shim.ChaincodeStubInterface, author string, repoName string, repoBranch datastructures.RepoBranch) ([]LedgerPair, error) {
+func generateRepoBranchesCommitsDBPairUsingBranch(stub shim.ChaincodeStubInterface, author string, repoName string, repoBranch datastructures.RepoBranch) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 
 	for _, log := range repoBranch.Logs {
-		pair, _ := GenerateRepoBranchCommitDBPair(stub, author, repoName, repoBranch.Name, log)
+		pair, _ := generateRepoBranchCommitDBPair(stub, author, repoName, repoBranch.Name, log)
 		list = append(list, pair)
 	}
 
 	return list, nil
 }
 
-func GenerateRepoBranchesCommitsDBPairUsingPushLog(stub shim.ChaincodeStubInterface, author string, repoName string, pushLog datastructures.PushLog) ([]LedgerPair, error) {
+func generateRepoBranchesCommitsDBPairUsingPushLog(stub shim.ChaincodeStubInterface, author string, repoName string, pushLog datastructures.PushLog) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 
 	for _, log := range pushLog.Logs {
-		pair, _ := GenerateRepoBranchCommitDBPair(stub, author, repoName, pushLog.BranchName, log)
+		pair, _ := generateRepoBranchCommitDBPair(stub, author, repoName, pushLog.BranchName, log)
 		list = append(list, pair)
 	}
 
@@ -166,7 +166,7 @@ func GetRepoKey(author string, repoName string) string {
 	return sEnc
 }
 
-func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate client.UserUpdate) ([]LedgerPair, error) {
+func generateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate client.UserUpdate) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 	fmt.Println(userUpdate.UserUpdateType)
@@ -225,7 +225,7 @@ func GenerateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate clie
 	return list, nil
 }
 
-func GenerateRepoUserAccessDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, authorized string, userAccess string, authorizer string) (LedgerPair, error) {
+func generateRepoUserAccessDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, authorized string, userAccess string, authorizer string) (LedgerPair, error) {
 
 	repoHash := GetRepoKey(author, repoName)
 
@@ -244,12 +244,12 @@ func GenerateRepoUserAccessDBPair(stub shim.ChaincodeStubInterface, author strin
 	return pair, nil
 }
 
-func GenerateRepoUserAccessesDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
+func generateRepoUserAccessesDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
 
 	list := make([]LedgerPair, 0)
 
 	for authorized, userAccess := range repo.Users {
-		pair, _ := GenerateRepoUserAccessDBPair(stub, repo.Author, repo.Name, authorized, strconv.Itoa(int(userAccess)), repo.Author)
+		pair, _ := generateRepoUserAccessDBPair(stub, repo.Author, repo.Name, authorized, strconv.Itoa(int(userAccess)), repo.Author)
 		list = append(list, pair)
 	}
 
