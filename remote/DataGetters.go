@@ -26,7 +26,7 @@ func (contract *RepoContract) getRepoInstance(stub shim.ChaincodeStubInterface, 
 	}
 
 	// getting the required information from first table.
-	repoHash := GetRepoKey(args[0], args[1])
+	repoHash := getRepoKey(args[0], args[1])
 	repoData, err := stub.GetState(string(repoHash))
 	if err != nil {
 		var repo datastructures.Repo
@@ -136,7 +136,7 @@ func (contract *RepoContract) queryRepo(stub shim.ChaincodeStubInterface, args [
 		return shim.Error("Incorrect number of arguments. Expecting 2.")
 	}
 
-	repoHash := GetRepoKey(args[0], args[1])
+	repoHash := getRepoKey(args[0], args[1])
 
 	// key := map[string]interface{}{"repoID": repoHash}
 	// jsonKey, _ := json.Marshal(key)
@@ -425,7 +425,7 @@ func (contract *RepoContract) queryRepoUserAccess(stub shim.ChaincodeStubInterfa
 		return shim.Error("Incorrect number of arguments. Expecting 2.")
 	}
 
-	repoHash := GetRepoKey(args[0], args[1])
+	repoHash := getRepoKey(args[0], args[1])
 
 	users, failMessage := contract.getRepoUsers(stub, repoHash)
 	if failMessage.Message != "" {

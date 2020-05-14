@@ -23,7 +23,7 @@ type LedgerPair struct {
 
 func generateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Repo) ([]LedgerPair, error) {
 
-	repoHash := GetRepoKey(repo.Author, repo.Name)
+	repoHash := getRepoKey(repo.Author, repo.Name)
 
 	list := make([]LedgerPair, 0)
 	var pair LedgerPair
@@ -57,7 +57,7 @@ func generateRepoDBPair(stub shim.ChaincodeStubInterface, repo datastructures.Re
 
 func generateRepoBranchDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, branch datastructures.RepoBranch) (LedgerPair, error) {
 
-	repoHash := GetRepoKey(author, repoName)
+	repoHash := getRepoKey(author, repoName)
 
 	var pair LedgerPair
 
@@ -90,7 +90,7 @@ func generateRepoBranchesDBPair(stub shim.ChaincodeStubInterface, repo datastruc
 
 func generateRepoBranchCommitDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, branchName string, commitLog datastructures.CommitLog) (LedgerPair, error) {
 
-	repoHash := GetRepoKey(author, repoName)
+	repoHash := getRepoKey(author, repoName)
 
 	var pair LedgerPair
 
@@ -145,7 +145,7 @@ func generateRepoBranchesCommitsDBPairUsingPushLog(stub shim.ChaincodeStubInterf
 	return list, nil
 }
 
-func GetRepoKey(author string, repoName string) string {
+func getRepoKey(author string, repoName string) string {
 
 	data := map[string]interface{}{"repoName": repoName, "author": author}
 	js, _ := json.Marshal(data)
@@ -227,7 +227,7 @@ func generateUserUpdateDBPairs(stub shim.ChaincodeStubInterface, userUpdate clie
 
 func generateRepoUserAccessDBPair(stub shim.ChaincodeStubInterface, author string, repoName string, authorized string, userAccess string, authorizer string) (LedgerPair, error) {
 
-	repoHash := GetRepoKey(author, repoName)
+	repoHash := getRepoKey(author, repoName)
 
 	var pair LedgerPair
 
@@ -256,7 +256,7 @@ func generateRepoUserAccessesDBPair(stub shim.ChaincodeStubInterface, repo datas
 	return list, nil
 }
 
-func CheckCurrentTimeStamp(timeStamp int64) bool {
+func checkCurrentTimeStamp(timeStamp int64) bool {
 	now := time.Now()
 	sec := now.Unix()
 
