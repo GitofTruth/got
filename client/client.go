@@ -1,21 +1,15 @@
 package client
 
-import (
-	"encoding/json"
-
-	"github.com/GitofTruth/got/common"
-	"github.com/GitofTruth/got/datastructures"
-)
-
 // should get info about current user, connect to send transactions to a contract and send transactions accordingly
 // Go Client is currently obsolete, only nodeJS is currently supported.
 type Client struct {
-	LastPush   int
-	LocalRepo  datastructures.Repo
-	RemoteRepo datastructures.Repo
-	Explorer   LogsExplorer
+	// LastPush   int
+	// LocalRepo  datastructures.Repo
+	// RemoteRepo datastructures.Repo
+	// Explorer   LogsExplorer
 }
 
+/*
 func CreateNewClient(lastPush int) (Client, error) {
 	var cli Client
 
@@ -82,3 +76,4 @@ func (cli *Client) CreateAddNewRepoMessage() string {
 
 	return string(argsStr)
 }
+*/

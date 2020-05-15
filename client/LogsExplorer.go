@@ -1,14 +1,6 @@
 package client
 
-import (
-	"fmt"
-	"log"
-	"os"
-
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
-)
-
+/*
 type LogsExplorer struct {
 	GitRepo *git.Repository
 	Logs    object.CommitIter
@@ -115,3 +107,4 @@ func (le *LogsExplorer) PrintAllLogs() bool {
 
 	return true
 }
+*/
