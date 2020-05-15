@@ -16,6 +16,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// This is the resulting key-value pair generated to store some the data
+// in the hyperledger after the maping from complex data structurs is done.
 type LedgerPair struct {
 	key   string
 	value []byte
